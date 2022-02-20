@@ -2,8 +2,6 @@ import queue
 import sys
 from logging import Logger
 import os
-from logging.handlers import QueueHandler, QueueListener
-
 from dotenv import load_dotenv
 import logging
 import database.repositories.settings
@@ -11,6 +9,7 @@ import log_handling
 from akaibot import AkaiBot
 from database.models.command import Command
 from database.models.helper_range import HelperRange
+from database.models.rank import UserRank
 from database.models.reaction_role import ReactionRole
 from database.models.setting import Setting
 from database.orm import Session
@@ -68,11 +67,12 @@ if __name__ == '__main__':
     )
     helper_repository = HelperRepository(
         sessionmaker=Session,
-        model=HelperRange
+        user_rank_model=UserRank,
+        helper_range_model=HelperRange
     )
-    command_service = CommandService(command_repository)
     reaction_role_service = ReactionRoleService(reaction_role_repository, logger)
     helper_service = HelperService(helper_repository, logger)
+    command_service = CommandService(command_repository, helper_service, logger, helper_repository)
     bot = AkaiBot(logger,
                   settings_repository,
                   command_service,
@@ -81,7 +81,7 @@ if __name__ == '__main__':
                   )
     if DISCORD_LOG_CHANNEL_ID is not None:
         discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
-        discord_handler.setLevel(logging.WARNING)
+        discord_handler.setLevel(logging.INFO)
         discord_handler.setFormatter(logging.Formatter(LOGGER_FORMATTING))
         logger.addHandler(discord_handler)
 
