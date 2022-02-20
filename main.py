@@ -1,9 +1,13 @@
+import queue
 import sys
 from logging import Logger
 import os
+from logging.handlers import QueueHandler, QueueListener
+
 from dotenv import load_dotenv
 import logging
 import database.repositories.settings
+import log_handling
 from akaibot import AkaiBot
 from database.models.command import Command
 from database.models.reaction_role import ReactionRole
@@ -14,8 +18,6 @@ from database.repositories.reaction_role import ReactionRoleRepository
 from services.command import CommandService
 from services.reaction import ReactionRoleService
 
-ENV_BOT_TOKEN = 'TOKEN'
-ENV_LOG_FILE = 'LOGFILE'
 WRITE_FILE_MODE = 'w'
 LOG_FILE_ENCODING = 'utf-8'
 DISCORD_LIB_LOGGER_NAME = 'discord'
@@ -25,8 +27,9 @@ LOGGER_FORMATTING = '%(asctime)s %(levelname)s %(name)s: %(message)s'
 
 # env
 load_dotenv()
-LOG_FILE = os.getenv(ENV_LOG_FILE)
-TOKEN = os.getenv(ENV_BOT_TOKEN)
+LOG_FILE = os.getenv('LOGFILE')
+TOKEN = os.getenv('TOKEN')
+DISCORD_LOG_CHANNEL_ID = os.getenv('DISCORD_LOG_CHANNEL_ID')
 #
 
 # discord lib logger
@@ -67,4 +70,10 @@ if __name__ == '__main__':
                   command_service,
                   reaction_role_service
                   )
+    if DISCORD_LOG_CHANNEL_ID is not None:
+        discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
+        discord_handler.setLevel(logging.INFO)
+        discord_handler.setFormatter(logging.Formatter(LOGGER_FORMATTING))
+        logger.addHandler(discord_handler)
+
     bot.run(TOKEN)
