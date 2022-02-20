@@ -7,5 +7,6 @@ class CommandService:
 
     async def handle(self, message):
         available_commands = self.repository.available_commands()
-        if message.content in available_commands:
-            await message.reply(self.repository.response_for_command(message.content))
+        trimmed_command = message.content[1:]
+        if trimmed_command in available_commands:
+            await message.reply(self.repository.response_for_command(trimmed_command))
