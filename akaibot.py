@@ -2,6 +2,7 @@ import logging
 import discord
 import database.repositories.settings
 from services.command import CommandService
+from services.helper import HelperService
 from services.reaction import ReactionRoleService
 
 
@@ -10,13 +11,15 @@ class AkaiBot(discord.Client):
                  logger: logging.Logger,
                  settings_repo: database.repositories.settings.SettingsRepository,
                  command_service: CommandService,
-                 reaction_role_service: ReactionRoleService
+                 reaction_role_service: ReactionRoleService,
+                 helper_service: HelperService
                  ):
         super().__init__(intents=discord.Intents.all())
         self.logger = logger
         self.settings = settings_repo
         self.command = command_service
         self.reaction = reaction_role_service
+        self.helper = helper_service
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
@@ -27,11 +30,11 @@ class AkaiBot(discord.Client):
             return
 
         if isinstance(message.channel, discord.DMChannel) or isinstance(message.channel, discord.GroupChannel):
-            self.logger.info(f'Private message received from {message.author}: {message.content}')
+            self.logger.debug(f'Private message received from {message.author}: {message.content}')
             await message.reply(self.settings.at_key('priv_response'))
             return
 
-        self.logger.info(f'Received message sent on '
+        self.logger.debug(f'Received message sent on '
                          f'{message.channel.name} in {message.channel.category.name} in '
                          f'{message.channel.guild.name}')
 

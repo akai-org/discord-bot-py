@@ -2,20 +2,22 @@ import queue
 import sys
 from logging import Logger
 import os
-from logging.handlers import QueueHandler, QueueListener
-
 from dotenv import load_dotenv
 import logging
 import database.repositories.settings
 import log_handling
 from akaibot import AkaiBot
 from database.models.command import Command
+from database.models.helper_range import HelperRange
+from database.models.rank import UserRank
 from database.models.reaction_role import ReactionRole
 from database.models.setting import Setting
 from database.orm import Session
 from database.repositories.commands import CommandsRepository
+from database.repositories.helper import HelperRepository
 from database.repositories.reaction_role import ReactionRoleRepository
 from services.command import CommandService
+from services.helper import HelperService
 from services.reaction import ReactionRoleService
 
 WRITE_FILE_MODE = 'w'
@@ -63,12 +65,19 @@ if __name__ == '__main__':
         sessionmaker=Session,
         model=ReactionRole
     )
-    command_service = CommandService(command_repository)
+    helper_repository = HelperRepository(
+        sessionmaker=Session,
+        user_rank_model=UserRank,
+        helper_range_model=HelperRange
+    )
     reaction_role_service = ReactionRoleService(reaction_role_repository, logger)
+    helper_service = HelperService(helper_repository, logger)
+    command_service = CommandService(command_repository, helper_service, logger, helper_repository)
     bot = AkaiBot(logger,
                   settings_repository,
                   command_service,
-                  reaction_role_service
+                  reaction_role_service,
+                  helper_service
                   )
     if DISCORD_LOG_CHANNEL_ID is not None:
         discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
