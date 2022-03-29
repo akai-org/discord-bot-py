@@ -1,5 +1,7 @@
 import logging
+
 import discord
+
 import database.repositories.settings
 from services.command import CommandService
 from services.helper import HelperService
@@ -35,8 +37,8 @@ class AkaiBot(discord.Client):
             return
 
         self.logger.debug(f'Received message sent on '
-                         f'{message.channel.name} in {message.channel.category.name} in '
-                         f'{message.channel.guild.name}')
+                          f'{message.channel.name} in {message.channel.category.name} in '
+                          f'{message.channel.guild.name}')
 
         if message.channel.id != int(self.settings.at_key('bot_channel_id')):
             self.logger.debug('Channel not recognized as subscribed')
@@ -54,7 +56,7 @@ class AkaiBot(discord.Client):
             self.logger.debug('Reaction message is not recognized as subscribed')
             return
         self.logger.debug(f'User {payload.member.display_name} reacted with {payload.emoji.name} '
-                         f'to message {payload.message_id}')
+                          f'to message {payload.message_id}')
         await self.reaction.add_role(payload.emoji, payload.member)
 
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -64,5 +66,5 @@ class AkaiBot(discord.Client):
             self.logger.debug('Reaction message is not recognized as subscribed')
             return
         self.logger.debug(f'Reaction {payload.emoji.name} from user {member.display_name}'
-                         f' to message {payload.message_id} has been cancelled ')
+                          f' to message {payload.message_id} has been cancelled ')
         await self.reaction.remove_role(payload.emoji, member)

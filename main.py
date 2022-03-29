@@ -1,9 +1,10 @@
-import queue
+import logging
+import os
 import sys
 from logging import Logger
-import os
+
 from dotenv import load_dotenv
-import logging
+
 import database.repositories.settings
 import log_handling
 from akaibot import AkaiBot
