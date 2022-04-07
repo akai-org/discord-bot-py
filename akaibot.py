@@ -1,3 +1,4 @@
+from email import message
 import logging
 import discord
 import database.repositories.settings
@@ -38,8 +39,8 @@ class AkaiBot(discord.Client):
             return
 
         self.logger.debug(f'Received message sent on '
-                         f'{message.channel.name} in {message.channel.category.name} in '
-                         f'{message.channel.guild.name}')
+                          f'{message.channel.name} in {message.channel.category.name} in '
+                          f'{message.channel.guild.name}')
 
         if message.channel.id == int(self.settings.at_key('thread_channel_id')):
             self.logger.debug('Channel recognized as threads')
@@ -57,22 +58,33 @@ class AkaiBot(discord.Client):
         await self.command.handle(message)
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        self.logger.debug('Recived reaction add info')
-        self.logger.debug(f'User {payload.member.display_name} reacted with {payload.emoji.name} '
-                         f'to message {payload.message_id}')
+        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
+        self.logger.debug('Received reaction add info')
+
+        if payload.emoji.name[:-1] == "thanks":
+            points = int(payload.emoji.name[-1])
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            self.helper.add_points(msg.author, member, self.user, points)
+
         if payload.message_id != int(self.settings.at_key('reaction_role_message_id')):
             self.logger.debug('Reaction message is not recognized as subscribed')
             return
         self.logger.debug(f'User {payload.member.display_name} reacted with {payload.emoji.name} '
-                         f'to message {payload.message_id}')
+                          f'to message {payload.message_id}')
         await self.reaction.add_role(payload.emoji, payload.member)
 
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         member = self.get_guild(payload.guild_id).get_member(payload.user_id)
-        self.logger.debug('Recived reaction remove info')
+        self.logger.debug('Received reaction remove info')
+
+        if payload.emoji.name[:-1] == "thanks":
+            points = int(payload.emoji.name[-1])
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            self.helper.remove_points(msg.author, member, self.user, points)
+
         if payload.message_id != int(self.settings.at_key('reaction_role_message_id')):
             self.logger.debug('Reaction message is not recognized as subscribed')
             return
         self.logger.debug(f'Reaction {payload.emoji.name} from user {member.display_name}'
-                         f' to message {payload.message_id} has been cancelled ')
+                          f' to message {payload.message_id} has been cancelled ')
         await self.reaction.remove_role(payload.emoji, member)

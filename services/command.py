@@ -20,14 +20,11 @@ class CommandService:
         guild = message.guild
         simple_commands = self.repository.available_commands()
         trimmed_command = message.content[1:]
+        
         if trimmed_command in simple_commands:
             await message.reply(self.repository.response_for_command(trimmed_command))
             return
         self.logger.debug('Simple command not recognized')
-        if trimmed_command.startswith('dziekuje'):
-            self.logger.debug('Thank you command recognized')
-            self.helper.handle_thankyou(message)
-            return
         if trimmed_command == 'ranking':
             self.logger.debug('Ranking command recognized')
             response = '\n'.join(
