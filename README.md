@@ -12,15 +12,20 @@
 1. Załóż serwer discord o podobnej strukturze do serwera AKAI
 2. Na discordzie włącz tryb developera, by umożliwić kopiowanie ID postów i emotikonów - [Jak to zrobić?](https://www.howtogeek.com/714348/how-to-enable-or-disable-developer-mode-on-discord/)
 3. Stworzyć nową aplikację na [Discord Developer Portal](https://discord.com/developers/applications/.)
+4. Po wejściu w aplikację na portalu dodać bota w zakładce Bot, dać mu. W sekcji Privileged Gateway Intents zaznaczyć wszystkie 3 *intenty*.
+5. W zakładce OAuth2 zaznaczyć Authorization Method na In-App Authorization ustawić scope jako bot i applications.commands a w Bot Permissions ustawić Administrator
+6. Uzupełniamy plik .env by Token zdobędziemy w zakładce Bot na portalu discord_log_channel zaś to ID kanału tekstowego na naszym serwerze gdzie będą wysyłane logi (pobrać to ID możemy klikając prawym przyciskiem myszy na kanał, jeśli aktywowaliśmy ustawienia developerskie)
+7. W tabeli settings w bazie danych zmieniamy bot_channel_id na ID kanału na którym będziemy wydawać polecenia Botowi
 
 
 ## Pomocne linki: 
-- [SQLAlchemy](https://docs.sqlalchemy.org/en/14/orm/tutorial.html)
-- [DiscordAPI](https://discordpy.readthedocs.io/en/stable/api.html) 
-Do developmentu trzeba założyć własny serwer discord, oraz aplikacje na platformie developerskiej  
-- Do kopiowania ID postów, emotikon etc można enablować tryb developerski w discordzie https://www.howtogeek.com/714348/how-to-enable-or-disable-developer-mode-on-discord/.  
+- [SQLAlchemy](https://docs.sqlalchemy.org/en/14/orm/tutorial.html) - używany ORM  
+- [DiscordAPI](https://discordpy.readthedocs.io/en/stable/api.html) - Discord.py sdk
+- [Tryb developera na Discordzie](https://www.howtogeek.com/714348/)
+- [Discord Developer Portal](https://discord.com/developers/applications/.)
 
 Dane zawarte w bazie danych zawartej na repo również należy zmienić: ustawić własny id kanałow, id postów, emoty etc. Setupu troche jest ale jest intuicyjny. Z głównych rzeczy jest tam używany natywny logger, orm sqlalchemy (choc bardzo amatorsko) oraz discord.py sdk.
+
 
 ## Baza danych
 Baza danych składa się z 6 tabel, każda z kolumn ma property not null:
