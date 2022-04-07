@@ -25,5 +25,5 @@ class ThreadService:
     
     async def new_thread(self, message: discord.Message):
         self.logger.debug('Creating thread')
-        f = await message.channel.create_thread(name="Dyskusja", minutes=1440, message=message)
+        await message.channel.create_thread(name="Dyskusja", minutes=1440, message=message)
         return
