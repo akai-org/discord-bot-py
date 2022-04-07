@@ -4,6 +4,7 @@ import database.repositories.settings
 from services.command import CommandService
 from services.helper import HelperService
 from services.reaction import ReactionRoleService
+from services.thread import ThreadService
 
 
 class AkaiBot(discord.Client):
@@ -12,7 +13,8 @@ class AkaiBot(discord.Client):
                  settings_repo: database.repositories.settings.SettingsRepository,
                  command_service: CommandService,
                  reaction_role_service: ReactionRoleService,
-                 helper_service: HelperService
+                 helper_service: HelperService,
+                 thread_service: ThreadService
                  ):
         super().__init__(intents=discord.Intents.all())
         self.logger = logger
@@ -20,6 +22,7 @@ class AkaiBot(discord.Client):
         self.command = command_service
         self.reaction = reaction_role_service
         self.helper = helper_service
+        self.thread = thread_service
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
@@ -38,6 +41,11 @@ class AkaiBot(discord.Client):
                          f'{message.channel.name} in {message.channel.category.name} in '
                          f'{message.channel.guild.name}')
 
+        if message.channel.id == int(self.settings.at_key('thread_channel_id')):
+            self.logger.debug('Channel recognized as threads')
+            await self.thread.new_thread(message)
+            return
+
         if message.channel.id != int(self.settings.at_key('bot_channel_id')):
             self.logger.debug('Channel not recognized as subscribed')
             return
@@ -50,6 +58,8 @@ class AkaiBot(discord.Client):
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         self.logger.debug('Recived reaction add info')
+        self.logger.debug(f'User {payload.member.display_name} reacted with {payload.emoji.name} '
+                         f'to message {payload.message_id}')
         if payload.message_id != int(self.settings.at_key('reaction_role_message_id')):
             self.logger.debug('Reaction message is not recognized as subscribed')
             return
