@@ -1,4 +1,3 @@
-from email import message
 import logging
 import discord
 import database.repositories.settings
