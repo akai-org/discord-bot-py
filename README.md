@@ -39,8 +39,8 @@ Baza danych składa się z 6 tabel, każda z kolumn ma property not null:
     - user_id - INT - PK
     - points - INT - default 0
  4. **helper_rewards** - mapuje reakcje pod odpowiedziami na pytania do punktów którymi nagradzany jest odpowiadający;
-    - reward - INT - PK
-    - emoji_name - TEXT
+    - emoji_name - TEXT - PK
+    - reward - INT
  5. **messages_to_roles** - mapuje id wiadomości projektowej do roli która została dla tego projektu utworzona;
     - message_id - INT - PK
     - role_id - INT
