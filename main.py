@@ -1,24 +1,25 @@
-import queue
+import logging
+import os
 import sys
 from logging import Logger
-import os
+
 from dotenv import load_dotenv
-import logging
+
 import database.repositories.settings
 import log_handling
 from akaibot import AkaiBot
 from database.models.command import Command
-from database.models.helper_range import HelperRange
-from database.models.rank import UserRank
-from database.models.reaction_role import ReactionRole
+from database.models.helper_rank import HelperRank
+from database.models.helper_rank_threshold import HelperRankThreshold
+from database.models.message_to_role import MessageToRole
 from database.models.setting import Setting
 from database.orm import Session
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
-from database.repositories.reaction_role import ReactionRoleRepository
+from database.repositories.reaction_role import MessageToRoleRepository
 from services.command import CommandService
 from services.helper import HelperService
-from services.reaction import ReactionRoleService
+from services.reaction import MessageToRoleService
 from services.thread import ThreadService
 
 WRITE_FILE_MODE = 'w'
@@ -54,6 +55,7 @@ logger.addHandler(console_handler)
 
 
 if __name__ == '__main__':
+    # repositories
     settings_repository = database.repositories.settings.SettingsRepository(
         sessionmaker=Session,
         model=Setting
@@ -62,26 +64,26 @@ if __name__ == '__main__':
         sessionmaker=Session,
         model=Command
     )
-    reaction_role_repository = ReactionRoleRepository(
+    message_to_role_repository = MessageToRoleRepository(
         sessionmaker=Session,
-        model=ReactionRole
+        model=MessageToRole
     )
     helper_repository = HelperRepository(
         sessionmaker=Session,
-        user_rank_model=UserRank,
-        helper_range_model=HelperRange
+        user_rank_model=HelperRank,
+        helper_range_model=HelperRankThreshold
     )
-    reaction_role_service = ReactionRoleService(reaction_role_repository, logger)
+
+    # services
+    message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
     helper_service = HelperService(helper_repository, logger)
-    command_service = CommandService(command_repository, helper_service, logger, helper_repository)
+    command_service = CommandService(command_repository, settings_repository, helper_service, logger, helper_repository,
+                                     message_to_role_repository)
     thread_service = ThreadService(logger)
-    bot = AkaiBot(logger,
-                  settings_repository,
-                  command_service,
-                  reaction_role_service,
-                  helper_service,
-                  thread_service
-                  )
+
+    bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
+                  helper_service, thread_service)
+
     if DISCORD_LOG_CHANNEL_ID is not None:
         discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
         discord_handler.setLevel(logging.INFO)

@@ -1,22 +1,29 @@
 import logging
 
 import discord
-
+import requests
+import os
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
+from database.repositories.reaction_role import MessageToRoleRepository
+from database.repositories.settings import SettingsRepository
 from services.helper import HelperService
 
 
 class CommandService:
     def __init__(self,
                  command_repository: CommandsRepository,
+                 settings_repo: SettingsRepository,
                  helper_service: HelperService,
                  logger: logging.Logger,
-                 helper_repository: HelperRepository):
+                 helper_repository: HelperRepository,
+                 message_to_role_repository: MessageToRoleRepository):
         self.repository = command_repository
+        self.settings = settings_repo
         self.helper = helper_service
         self.logger = logger
         self.helper_repository = helper_repository
+        self.message_to_role_repo = message_to_role_repository
 
     async def handle(self, message: discord.Message):
         guild: discord.Guild = message.guild
@@ -47,16 +54,37 @@ class CommandService:
                 return
             await message.reply(response)
 
+        if message.channel.id != int(self.settings.at_key('cli_channel_id')):
+            self.logger.debug('Channel not recognized as subscribed')
+            return
+
         if command == 'projekt':
             project_name = ''.join(message.content.split()[1:])
+
             if project_name == '':
                 await message.reply('empty name')
                 return
 
             self.logger.debug(f'New project named {project_name} recognized')
+            project_channel_id = int(self.settings.at_key('project_channel_id'))
 
-            if project_name in guild.roles:
-                await message.reply('project already exists')
+            if project_name not in guild.roles:
+                role = await guild.create_role(name=project_name)
+
+                # TODO: send message on project channel
+                token = 'Bot ' + os.getenv('TOKEN')
+                url = f"https://discord.com/api/v9/channels/{project_channel_id}/messages"
+                headers = {
+                    "authorization": token,
+                    "content-type": "application/json"
+                }
+                data = {
+                    "content": f'New project {project_name} appeared!'
+                }
+                response = requests.post(url, headers=headers, json=data).json()
+                self.message_to_role_repo.create_message_role_association(response['id'], role.id)
+
+                channel = guild.get_channel(project_channel_id)
+                await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
             else:
-                await guild.create_role(name=project_name)
-            await message.add_reaction('✅')
+                await message.reply('project already exists')
