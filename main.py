@@ -21,6 +21,7 @@ from services.command import CommandService
 from services.helper import HelperService
 from services.reaction import MessageToRoleService
 from services.thread import ThreadService
+from services.util.request import RequestUtilService
 
 WRITE_FILE_MODE = 'w'
 LOG_FILE_ENCODING = 'utf-8'
@@ -75,11 +76,12 @@ if __name__ == '__main__':
     )
 
     # services
+    request_util = RequestUtilService(TOKEN)
     message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
     helper_service = HelperService(helper_repository, logger)
     command_service = CommandService(command_repository, settings_repository, helper_service, logger, helper_repository,
-                                     message_to_role_repository)
-    thread_service = ThreadService(logger)
+                                     message_to_role_repository, request_util)
+    thread_service = ThreadService(logger, request_util)
 
     bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
                   helper_service, thread_service)

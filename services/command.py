@@ -1,13 +1,13 @@
 import logging
 
 import discord
-import requests
-import os
+
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
 from database.repositories.reaction_role import MessageToRoleRepository
 from database.repositories.settings import SettingsRepository
 from services.helper import HelperService
+from services.util.request import RequestUtilService
 
 
 class CommandService:
@@ -17,13 +17,15 @@ class CommandService:
                  helper_service: HelperService,
                  logger: logging.Logger,
                  helper_repository: HelperRepository,
-                 message_to_role_repository: MessageToRoleRepository):
+                 message_to_role_repository: MessageToRoleRepository,
+                 request_util: RequestUtilService):
         self.repository = command_repository
         self.settings = settings_repo
         self.helper = helper_service
         self.logger = logger
         self.helper_repository = helper_repository
         self.message_to_role_repo = message_to_role_repository
+        self.request_util = request_util
 
     async def handle(self, message: discord.Message):
         guild: discord.Guild = message.guild
@@ -71,17 +73,12 @@ class CommandService:
             if project_name not in guild.roles:
                 role = await guild.create_role(name=project_name)
 
-                # TODO: send message on project channel
-                token = 'Bot ' + os.getenv('TOKEN')
-                url = f"https://discord.com/api/v9/channels/{project_channel_id}/messages"
-                headers = {
-                    "authorization": token,
-                    "content-type": "application/json"
-                }
+                url = f"/channels/{project_channel_id}/messages"
                 data = {
                     "content": f'New project {project_name} appeared!'
                 }
-                response = requests.post(url, headers=headers, json=data).json()
+                response = self.request_util.make_post(data, url)
+
                 self.message_to_role_repo.create_message_role_association(response['id'], role.id)
 
                 channel = guild.get_channel(project_channel_id)
