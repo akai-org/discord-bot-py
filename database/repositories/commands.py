@@ -1,9 +1,9 @@
-from database.repositories.repository import Repository
 from sqlalchemy import select
+
+from database.repositories.repository import Repository
 
 
 class CommandsRepository(Repository):
-
     def available_commands(self) -> list:
         session = self.sessionmaker()
         commands = session.execute(select(self.model.command)).scalars().all()

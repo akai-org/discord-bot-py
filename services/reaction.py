@@ -12,7 +12,7 @@ class MessageToRoleService:
 
     async def add_role(self, message_id, user: discord.Member):
         if user.bot:
-            print("Reaction received from a bot")
+            self.logger.debug("Reaction received from a bot")
             return
 
         associated_role_id = self.repository.get_role_id(message_id)
@@ -35,7 +35,7 @@ class MessageToRoleService:
 
     async def remove_role(self, message_id, user: discord.Member):
         if user.bot:
-            print("Reaction removed by a bot")
+            self.logger.debug("Reaction removed by a bot")
             return
 
         associated_role_id = self.repository.get_role_id(message_id)
