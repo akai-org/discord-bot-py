@@ -4,7 +4,7 @@ import discord
 
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
-from database.repositories.reaction_role import MessageToRoleRepository
+from database.repositories.message_to_role import MessageToRoleRepository
 from database.repositories.settings import SettingsRepository
 from services.helper import HelperService
 from services.util.request import RequestUtilService

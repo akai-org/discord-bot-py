@@ -16,10 +16,10 @@ from database.models.setting import Setting
 from database.orm import Session
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
-from database.repositories.reaction_role import MessageToRoleRepository
+from database.repositories.message_to_role import MessageToRoleRepository
 from services.command import CommandService
 from services.helper import HelperService
-from services.reaction import MessageToRoleService
+from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
 from services.util.request import RequestUtilService
 

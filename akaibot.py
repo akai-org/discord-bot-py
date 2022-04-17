@@ -3,10 +3,10 @@ import logging
 import discord
 
 import database.repositories.settings
-from database.repositories.reaction_role import MessageToRoleRepository
+from database.repositories.message_to_role import MessageToRoleRepository
 from services.command import CommandService
 from services.helper import HelperService
-from services.reaction import MessageToRoleService
+from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
 
 

@@ -2,7 +2,7 @@ import logging
 
 import discord
 
-from database.repositories.reaction_role import MessageToRoleRepository
+from database.repositories.message_to_role import MessageToRoleRepository
 
 
 class MessageToRoleService:
