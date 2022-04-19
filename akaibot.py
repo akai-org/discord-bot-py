@@ -4,6 +4,7 @@ import discord
 
 import database.repositories.settings
 from database.repositories.message_to_role import MessageToRoleRepository
+from database.repositories.helper import HelperRepository
 from services.command import CommandService
 from services.helper import HelperService
 from services.message_to_role import MessageToRoleService
@@ -18,6 +19,7 @@ class AkaiBot(discord.Client):
                  message_to_role_service: MessageToRoleService,
                  message_to_role_repo: MessageToRoleRepository,
                  helper_service: HelperService,
+                 helper_repo: HelperRepository,
                  thread_service: ThreadService
                  ):
         super().__init__(intents=discord.Intents.all())
@@ -27,6 +29,7 @@ class AkaiBot(discord.Client):
         self.role_service = message_to_role_service
         self.role_repo = message_to_role_repo
         self.helper = helper_service
+        self.helper_repo = helper_repo
         self.thread = thread_service
 
     async def on_ready(self):
@@ -77,6 +80,12 @@ class AkaiBot(discord.Client):
 
         await self.role_service.add_role(payload.message_id, payload.member)
 
+        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
+        if payload.emoji.name in self.helper_repo.get_emojis():
+            points = self.helper_repo.get_reward(payload.emoji.name)
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            self.helper.add_points(msg.author, member, self.user, points)
+
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         member = self.get_guild(payload.guild_id).get_member(payload.user_id)
         self.logger.debug('Received reaction remove info')
@@ -93,3 +102,8 @@ class AkaiBot(discord.Client):
                           f' to message {payload.message_id} has been cancelled')
 
         await self.role_service.remove_role(payload.message_id, member)
+
+        if payload.emoji.name in self.helper_repo.get_emojis():
+            points = self.helper_repo.get_reward(payload.emoji.name)
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            self.helper.remove_points(msg.author, member, self.user, points)
