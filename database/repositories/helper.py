@@ -6,10 +6,11 @@ from database.repositories.repository import Repository
 
 
 class HelperRepository(Repository):
-    def __init__(self, sessionmaker: session, user_rank_model: Base, helper_range_model: Base):
+    def __init__(self, sessionmaker: session, user_rank_model: Base, helper_range_model: Base, helper_reward_model: Base):
         super(HelperRepository, self).__init__(sessionmaker=sessionmaker, model=user_rank_model)
-        self.user_model = user_rank_model
-        self.helper_model = helper_range_model
+        self.user_rank_model = user_rank_model
+        self.helper_range_model = helper_range_model
+        self.helper_reward_model = helper_reward_model
 
     def add_points_to_user(self, user_id, points):
         session = self.sessionmaker()
@@ -28,10 +29,8 @@ class HelperRepository(Repository):
 
     def role_id_user_should_have(self, user_id) -> int:
         session = self.sessionmaker()
-        user_points = session.execute(
-            select(self.user_model.points).where(self.user_model.user_id == user_id)).scalars().first()
-        role_id = session.execute(
-            select(self.helper_model.role_id).where(self.helper_model.bottom_limit <= user_points)).scalars().first()
+        user_points = session.execute(select(self.user_model.points).where(self.user_model.user_id == user_id)).scalars().first()
+        role_id = session.execute(select(self.helper_model.role_id).where(self.helper_model.bottom_threshold<= user_points)).scalars().first()
         session.close()
         return role_id
 
@@ -40,3 +39,15 @@ class HelperRepository(Repository):
         users = session.execute(select(self.user_model).order_by(self.user_model.points.desc())).scalars().all()
         session.close()
         return users
+
+    def get_reward(self, emoji_name) -> int:
+        session = self.sessionmaker()
+        reward = session.execute(select(self.helper_reward_model.reward).where(self.helper_reward_model.emoji_name == emoji_name)).scalars().first()
+        session.close()
+        return reward
+
+    def get_emojis(self) -> list:
+        session = self.sessionmaker()
+        emojis = session.execute(select(self.helper_reward_model.emoji_name)).scalars().all()
+        session.close()
+        return emojis
