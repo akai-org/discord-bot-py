@@ -84,7 +84,7 @@ class AkaiBot(discord.Client):
         if payload.emoji.name in self.helper_repo.get_emojis():
             points = self.helper_repo.get_reward(payload.emoji.name)
             msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.add_points(msg.author, member, self.user, points)
+            self.helper.change_points(msg.author, member, self.user, points)
 
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         member = self.get_guild(payload.guild_id).get_member(payload.user_id)
@@ -106,4 +106,4 @@ class AkaiBot(discord.Client):
         if payload.emoji.name in self.helper_repo.get_emojis():
             points = self.helper_repo.get_reward(payload.emoji.name)
             msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.remove_points(msg.author, member, self.user, points)
+            self.helper.change_points(msg.author, member, self.user, -points)

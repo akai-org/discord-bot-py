@@ -10,20 +10,11 @@ class HelperService:
         self.logger = logger
         self.repository = repository
 
-    def add_points(self, thanked, thanker, bot, p):
+    def change_points(self, thanked, thanker, bot, p):
         if thanked not in {thanker, bot}:
             self.repository.add_points_to_user(thanked.id, p)
-            self.logger.debug(f'User {thanked.display_name} got {p} point{"" if p == 1 else "s"} from '
+            self.logger.debug(f'User {thanked.display_name} {"lost" if p < 0 else "got"} {p} point{"" if abs(p) == 1 else "s"} from '
                               f'{thanker.display_name} for being helpful')
         else:
             self.logger.debug(f'User {thanker.display_name} cannot thank '
                               f'{thanked.display_name}')
-
-    def remove_points(self, thanked, thanker, bot, p):
-        if thanked not in {thanker, bot}:
-            self.repository.add_points_to_user(thanked.id, -p)
-            self.logger.debug(f'User {thanked.display_name} lost {p} point{"" if p == 1 else "s"} from '
-                              f'{thanker.display_name}')
-        else:
-            self.logger.debug(f'User {thanker.display_name} cannot thank '
-                              f'{thanked.display_name} *')
