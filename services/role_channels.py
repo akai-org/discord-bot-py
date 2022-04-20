@@ -40,3 +40,30 @@ class RoleChannels:
             await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
         else:
             await message.reply('project already exists')
+
+
+    async def handle_tech_channel(self, message):
+        guild = message.guild
+        tech_name = ''.join(message.content.split()[1:])
+        if tech_name == '':
+            await message.reply('empty name')
+            return
+
+        self.logger.debug(f'New technology named {tech_name} recognized')
+        technology_channel_id = int(self.settings.at_key('technology_channel_id'))
+
+        if tech_name not in [x.name for x in guild.roles]:
+            role = await guild.create_role(name=tech_name)
+
+            url = f"/channels/{technology_channel_id}/messages"
+            data = {
+                "content": f'New technology {tech_name} appeared!'
+            }
+            response = self.request_util.make_post(data, url)
+
+            self.message_to_role_repo.create_message_role_association(response['id'], role.id)
+
+            channel = guild.get_channel(technology_channel_id)
+            await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
+        else:
+            await message.reply('technology already exists')

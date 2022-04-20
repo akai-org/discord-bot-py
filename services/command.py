@@ -66,4 +66,8 @@ class CommandService:
         if command == 'projekt':
             await self.role_channels.handle_project_channel(message)
             return
+        
+        if command == 'tech':
+            await self.role_channels.handle_tech_channel(message)
+            return
             
