@@ -19,6 +19,7 @@ from database.repositories.helper import HelperRepository
 from database.repositories.message_to_role import MessageToRoleRepository
 from services.command import CommandService
 from services.helper import HelperService
+from services.role_channels import RoleChannels
 from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
 from services.util.request import RequestUtilService
@@ -79,7 +80,8 @@ if __name__ == '__main__':
     request_util = RequestUtilService(TOKEN)
     message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
     helper_service = HelperService(helper_repository, logger)
-    command_service = CommandService(command_repository, settings_repository, helper_service, logger, helper_repository,
+    role_channels = RoleChannels(logger, settings_repository, message_to_role_repository, request_util)
+    command_service = CommandService(command_repository, settings_repository, helper_service, role_channels, logger, helper_repository,
                                      message_to_role_repository, request_util)
     thread_service = ThreadService(logger, request_util)
 

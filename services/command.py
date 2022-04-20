@@ -7,6 +7,7 @@ from database.repositories.helper import HelperRepository
 from database.repositories.message_to_role import MessageToRoleRepository
 from database.repositories.settings import SettingsRepository
 from services.helper import HelperService
+from services.role_channels import RoleChannels
 from services.util.request import RequestUtilService
 
 
@@ -15,6 +16,7 @@ class CommandService:
                  command_repository: CommandsRepository,
                  settings_repo: SettingsRepository,
                  helper_service: HelperService,
+                 role_channels: RoleChannels,
                  logger: logging.Logger,
                  helper_repository: HelperRepository,
                  message_to_role_repository: MessageToRoleRepository,
@@ -22,6 +24,7 @@ class CommandService:
         self.repository = command_repository
         self.settings = settings_repo
         self.helper = helper_service
+        self.role_channels = role_channels
         self.logger = logger
         self.helper_repository = helper_repository
         self.message_to_role_repo = message_to_role_repository
@@ -61,27 +64,6 @@ class CommandService:
             return
 
         if command == 'projekt':
-            project_name = ''.join(message.content.split()[1:])
-
-            if project_name == '':
-                await message.reply('empty name')
-                return
-
-            self.logger.debug(f'New project named {project_name} recognized')
-            project_channel_id = int(self.settings.at_key('project_channel_id'))
-
-            if project_name not in guild.roles:
-                role = await guild.create_role(name=project_name)
-
-                url = f"/channels/{project_channel_id}/messages"
-                data = {
-                    "content": f'New project {project_name} appeared!'
-                }
-                response = self.request_util.make_post(data, url)
-
-                self.message_to_role_repo.create_message_role_association(response['id'], role.id)
-
-                channel = guild.get_channel(project_channel_id)
-                await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
-            else:
-                await message.reply('project already exists')
+            await self.role_channels.handle_project_channel(message)
+            return
+            
