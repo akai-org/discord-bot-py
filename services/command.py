@@ -32,11 +32,6 @@ class CommandService:
             return
         self.logger.debug('Simple command not recognized')
 
-        if command.startswith('dziekuje'):
-            self.logger.debug('Thank you command recognized')
-            self.helper.handle_thankyou(message)
-            return
-
         if command == 'ranking':
             self.logger.debug('Ranking command recognized')
             response = '\n'.join(

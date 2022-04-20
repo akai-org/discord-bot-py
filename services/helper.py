@@ -10,9 +10,11 @@ class HelperService:
         self.logger = logger
         self.repository = repository
 
-    def handle_thankyou(self, message: discord.Message):
-        thanked_users: list[discord.Member] = message.mentions
-        for user in thanked_users:
-            self.repository.add_points_to_user(user.id, 1)
-            self.logger.info(f'User {user.display_name} got {1} point from '
-                             f'{message.author.display_name} for being helpful')
+    def change_points(self, thanked, thanker, bot, p):
+        if thanked not in {thanker, bot}:
+            self.repository.add_points_to_user(thanked.id, p)
+            self.logger.debug(f'User {thanked.display_name} {"lost" if p < 0 else "got"} {p} point{"" if abs(p) == 1 else "s"} from '
+                              f'{thanker.display_name} for being helpful')
+        else:
+            self.logger.debug(f'User {thanker.display_name} cannot thank '
+                              f'{thanked.display_name}')

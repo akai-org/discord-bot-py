@@ -12,6 +12,7 @@ from database.models.command import Command
 from database.models.helper_rank import HelperRank
 from database.models.helper_rank_threshold import HelperRankThreshold
 from database.models.message_to_role import MessageToRole
+from database.models.helper_reward import HelperReward
 from database.models.setting import Setting
 from database.orm import Session
 from database.repositories.commands import CommandsRepository
@@ -73,7 +74,8 @@ if __name__ == '__main__':
     helper_repository = HelperRepository(
         sessionmaker=Session,
         user_rank_model=HelperRank,
-        helper_range_model=HelperRankThreshold
+        helper_range_model=HelperRankThreshold,
+        helper_reward_model=HelperReward
     )
 
     # services
@@ -85,7 +87,7 @@ if __name__ == '__main__':
     thread_service = ThreadService(logger, request_util)
 
     bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
-                  helper_service, thread_service)
+                  helper_service, helper_repository, thread_service)
 
     if DISCORD_LOG_CHANNEL_ID is not None:
         discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
