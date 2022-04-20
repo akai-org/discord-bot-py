@@ -25,7 +25,7 @@ class RoleChannels:
         self.logger.debug(f'New project named {project_name} recognized')
         project_channel_id = int(self.settings.at_key('project_channel_id'))
 
-        if project_name not in guild.roles:
+        if project_name not in [x.name for x in guild.roles]:
             role = await guild.create_role(name=project_name)
 
             url = f"/channels/{project_channel_id}/messages"
