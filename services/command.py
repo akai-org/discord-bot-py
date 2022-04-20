@@ -12,12 +12,12 @@ class CommandService:
     def __init__(self,
                  command_repository: CommandsRepository,
                  helper_service: HelperService,
-                 role_channels: RoleChannels,
+                 role_channels_service: RoleChannels,
                  logger: logging.Logger,
                  helper_repository: HelperRepository):
         self.repository = command_repository
         self.helper = helper_service
-        self.role_channels = role_channels
+        self.role_channels = role_channels_service
         self.logger = logger
         self.helper_repository = helper_repository
 
