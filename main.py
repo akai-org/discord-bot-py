@@ -81,8 +81,7 @@ if __name__ == '__main__':
     message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
     helper_service = HelperService(helper_repository, logger)
     role_channels = RoleChannels(logger, settings_repository, message_to_role_repository, request_util)
-    command_service = CommandService(command_repository, settings_repository, helper_service, role_channels, logger, helper_repository,
-                                     message_to_role_repository, request_util)
+    command_service = CommandService(command_repository, helper_service, role_channels, logger, helper_repository)
     thread_service = ThreadService(logger, request_util)
 
     bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,

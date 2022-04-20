@@ -4,31 +4,22 @@ import discord
 
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
-from database.repositories.message_to_role import MessageToRoleRepository
-from database.repositories.settings import SettingsRepository
 from services.helper import HelperService
 from services.role_channels import RoleChannels
-from services.util.request import RequestUtilService
 
 
 class CommandService:
     def __init__(self,
                  command_repository: CommandsRepository,
-                 settings_repo: SettingsRepository,
                  helper_service: HelperService,
                  role_channels: RoleChannels,
                  logger: logging.Logger,
-                 helper_repository: HelperRepository,
-                 message_to_role_repository: MessageToRoleRepository,
-                 request_util: RequestUtilService):
+                 helper_repository: HelperRepository):
         self.repository = command_repository
-        self.settings = settings_repo
         self.helper = helper_service
         self.role_channels = role_channels
         self.logger = logger
         self.helper_repository = helper_repository
-        self.message_to_role_repo = message_to_role_repository
-        self.request_util = request_util
 
     async def handle(self, message: discord.Message):
         guild: discord.Guild = message.guild
