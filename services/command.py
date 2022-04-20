@@ -59,10 +59,6 @@ class CommandService:
                 return
             await message.reply(response)
 
-        if message.channel.id != int(self.settings.at_key('cli_channel_id')):
-            self.logger.debug('Channel not recognized as subscribed')
-            return
-
         if command == 'projekt':
             await self.role_channels.handle_project_channel(message)
             return
