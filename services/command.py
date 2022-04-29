@@ -32,19 +32,6 @@ class CommandService:
             return
         self.logger.debug('Simple command not recognized')
 
-        if command == 'ranking':
-            self.logger.debug('Ranking command recognized')
-            response = '\n'.join(
-                [
-                    f'{guild.get_member(rank.user_id)}\t has \t {rank.points} points'
-                    for rank in self.helper_repository.get_whole_rank()
-                ],
-            ).strip()
-            if not response:
-                self.logger.debug('Reply not sent, because resulting response was empty')
-                return
-            await message.reply(response)
-
         if command == 'projekt':
             await self.role_channels.handle_project_channel(message)
             return
