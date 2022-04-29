@@ -9,6 +9,7 @@ from services.command import CommandService
 from services.helper import HelperService
 from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
+from services.ranking import RankingService
 
 
 class AkaiBot(discord.Client):
@@ -20,7 +21,8 @@ class AkaiBot(discord.Client):
                  message_to_role_repo: MessageToRoleRepository,
                  helper_service: HelperService,
                  helper_repo: HelperRepository,
-                 thread_service: ThreadService
+                 thread_service: ThreadService,
+                 ranking_service: RankingService
                  ):
         super().__init__(intents=discord.Intents.all())
         self.logger = logger
@@ -31,11 +33,17 @@ class AkaiBot(discord.Client):
         self.helper = helper_service
         self.helper_repo = helper_repo
         self.thread = thread_service
+        self.ranking = ranking_service
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
 
     async def on_message(self, message: discord.Message):
+        if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
+            self.logger.debug('Channel recognized as ranking')
+            await self.ranking.setup(self, message)
+            return
+
         if message.author == self.user:
             self.logger.debug('Recognized self as message author')
             return
@@ -66,6 +74,12 @@ class AkaiBot(discord.Client):
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         self.logger.debug('Received reaction add info')
+        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
+        if payload.emoji.name in self.helper_repo.get_emojis():
+            points = self.helper_repo.get_reward(payload.emoji.name)
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            self.helper.change_points(msg.author, member, self.user, points)
+            await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:
             self.logger.debug('Received a reaction on a message not associated with any role')
@@ -80,15 +94,14 @@ class AkaiBot(discord.Client):
 
         await self.role_service.add_role(payload.message_id, payload.member)
 
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+        self.logger.debug('Received reaction remove info')
         member = self.get_guild(payload.guild_id).get_member(payload.user_id)
         if payload.emoji.name in self.helper_repo.get_emojis():
             points = self.helper_repo.get_reward(payload.emoji.name)
             msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.change_points(msg.author, member, self.user, points)
-
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
-        self.logger.debug('Received reaction remove info')
+            self.helper.change_points(msg.author, member, self.user, -points)
+            await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:
             self.logger.debug('Received a reaction removal on a message not associated with any role')
@@ -102,8 +115,3 @@ class AkaiBot(discord.Client):
                           f' to message {payload.message_id} has been cancelled')
 
         await self.role_service.remove_role(payload.message_id, member)
-
-        if payload.emoji.name in self.helper_repo.get_emojis():
-            points = self.helper_repo.get_reward(payload.emoji.name)
-            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.change_points(msg.author, member, self.user, -points)

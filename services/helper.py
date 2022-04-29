@@ -14,7 +14,7 @@ class HelperService:
         if thanked not in {thanker, bot}:
             self.repository.add_points_to_user(thanked.id, p)
             self.logger.debug(f'User {thanked.display_name} {"lost" if p < 0 else "got"} {p} point{"" if abs(p) == 1 else "s"} from '
-                              f'{thanker.display_name} for being helpful')
+                              f'{thanker.display_name}')
         else:
             self.logger.debug(f'User {thanker.display_name} cannot thank '
                               f'{thanked.display_name}')
