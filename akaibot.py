@@ -40,8 +40,15 @@ class AkaiBot(discord.Client):
 
     async def on_message(self, message: discord.Message):
         if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
-            self.logger.debug('Channel recognized as ranking')
-            await self.ranking.setup(self, message)
+            if message.content == "$setup":
+                self.ranking.channel = message.channel
+                await message.delete()
+                await self.ranking.channel.send('Loading...')
+            if message.author == self.user:
+                self.ranking.anchor = message
+                self.ranking.guild = message.guild
+                self.logger.debug('Ranking has been set up.')
+                await self.ranking.update()
             return
 
         if message.author == self.user:
