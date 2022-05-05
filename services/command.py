@@ -24,20 +24,23 @@ class CommandService:
     async def handle(self, message: discord.Message):
         guild: discord.Guild = message.guild
         simple_commands = self.repository.available_commands()
-        command = message.content.split()[0][1:]
 
-        self.logger.debug(f'content: {message.content}')
-        if command in simple_commands:
-            await message.reply(self.repository.response_for_command(command))
+        command = parse_command(message)
+
+        self.logger.debug(f"Command '{command['name']}' recognized with arguments {command['args']} and parameters {command['params']}")
+
+
+        if command['name'] in simple_commands:
+            await message.reply(self.repository.response_for_command(command['name']))
             return
         self.logger.debug('Simple command not recognized')
 
-        if command.startswith('dziekuje'):
+        if command['name'].startswith('dziekuje'):
             self.logger.debug('Thank you command recognized')
             self.helper.handle_thankyou(message)
             return
 
-        if command == 'ranking':
+        if command['name'] == 'ranking':
             self.logger.debug('Ranking command recognized')
             response = '\n'.join(
                 [
@@ -50,11 +53,20 @@ class CommandService:
                 return
             await message.reply(response)
 
-        if command == 'projekt':
+        if command['name'] == 'projekt':
             await self.role_channels.handle_project_channel(message)
             return
         
-        if command == 'tech':
+        if command['name'] == 'tech':
             await self.role_channels.handle_tech_channel(message)
             return
-            
+        
+def parse_command(message: discord.Message):
+    command = message.content.split()[0][1:]
+    arguments = message.content.split("-")[0].split()[1:]
+    params = {p[0]:p[1:].split() for p in message.content.split("-")[1:]}
+    return {
+        'name': command,
+        'args': arguments,
+        'params': params,
+    }
