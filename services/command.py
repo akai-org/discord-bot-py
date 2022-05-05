@@ -53,13 +53,10 @@ class CommandService:
                 return
             await message.reply(response)
 
-        if command['name'] == 'projekt':
-            await self.role_channels.handle_project_channel(message)
+        if command['name'] in ['projekt', 'tech']:
+            await self.role_channels.handle_role_channel(message, command)
             return
-        
-        if command['name'] == 'tech':
-            await self.role_channels.handle_tech_channel(message)
-            return
+
         
 def parse_command(message: discord.Message):
     command = message.content.split()[0][1:]
