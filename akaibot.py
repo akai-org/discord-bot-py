@@ -85,7 +85,7 @@ class AkaiBot(discord.Client):
         if payload.emoji.name in self.helper_repo.get_emojis():
             points = self.helper_repo.get_reward(payload.emoji.name)
             msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.change_points(msg.author, member, self.user, points)
+            await self.helper.change_points(msg.author, member, self.user, points)
             await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:
@@ -107,7 +107,7 @@ class AkaiBot(discord.Client):
         if payload.emoji.name in self.helper_repo.get_emojis():
             points = self.helper_repo.get_reward(payload.emoji.name)
             msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            self.helper.change_points(msg.author, member, self.user, -points)
+            await self.helper.change_points(msg.author, member, self.user, -points)
             await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:

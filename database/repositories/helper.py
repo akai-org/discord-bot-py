@@ -30,7 +30,7 @@ class HelperRepository(Repository):
     def role_id_user_should_have(self, user_id) -> int:
         session = self.sessionmaker()
         user_points = session.execute(select(self.user_rank_model.points).where(self.user_rank_model.user_id == user_id)).scalars().first()
-        role_id = session.execute(select(self.range_model.role_id).where(self.range_model.bottom_threshold<= user_points)).scalars().first()
+        role_id = session.execute(select(self.range_model.role_id).order_by(self.range_model.bottom_threshold.desc()).where(self.range_model.bottom_threshold<= user_points)).scalars().first()
         session.close()
         return role_id
 
@@ -52,3 +52,8 @@ class HelperRepository(Repository):
         session.close()
         return emojis
         
+    def get_roles(self) -> list:
+        session = self.sessionmaker()
+        roles = session.execute(select(self.range_model.role_id)).scalars().all()
+        session.close()
+        return roles
