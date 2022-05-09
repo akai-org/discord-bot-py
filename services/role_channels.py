@@ -1,4 +1,5 @@
 from distutils.log import debug
+import discord
 import logging
 
 from database.repositories.settings import SettingsRepository
@@ -66,4 +67,9 @@ class RoleChannels:
                 await m.delete()
 
                 role_type = TYPES[command["name"]]["name"]
+                role_object = discord.utils.get(guild.roles, name=role_name) 
+                await role_object.delete()
+
                 await message.reply(f'Deleted {role_type} - {role_name}')
+
+
