@@ -1,3 +1,4 @@
+from distutils.log import debug
 import logging
 
 from database.repositories.settings import SettingsRepository
@@ -25,6 +26,8 @@ class RoleChannels:
         for role_name in command['args']:
             if len(command['params']) == 0:
                 await self.create_role_channel(message, command, role_name)
+            elif "d" in command['params']:
+                await self.delete_role_channel(message, command, role_name)
 
 
     async def create_role_channel(self, message, command, role_name):
@@ -50,3 +53,17 @@ class RoleChannels:
             await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
         else:
             await message.reply(f'{role_type} - {role_name} already exists')
+
+    
+    async def delete_role_channel(self, message, command, role_name):
+        guild = message.guild
+        channel_id = int(self.settings.at_key(TYPES[command["name"]]['id']))
+        channel = guild.get_channel(channel_id)
+        messages = await channel.history(limit=1000).flatten()
+        for m in messages:
+            if(role_name in m.content.split()):
+                self.logger.debug(f'Deleting {role_name} from {channel.name}')
+                await m.delete()
+
+                role_type = TYPES[command["name"]]["name"]
+                await message.reply(f'Deleted {role_type} - {role_name}')
