@@ -24,6 +24,9 @@ class RoleChannels:
 
 
     async def handle_role_channel(self, message, command):
+        if len(command["args"]) == 0:
+            await message.reply(f'USAGE: \n\t{command["name"]} <role_names>\t      - to create roles \n\t{command["name"]} <role_names> -d\t - to delete roles')
+
         for role_name in command['args']:
             if len(command['params']) == 0:
                 await self.create_role_channel(message, command, role_name)
@@ -71,5 +74,7 @@ class RoleChannels:
                 await role_object.delete()
 
                 await message.reply(f'Deleted {role_type} - {role_name}')
-
+                break
+        else:
+            await message.reply(f'{role_name} not found in {channel.name}')
 
