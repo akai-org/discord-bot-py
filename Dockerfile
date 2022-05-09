@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-MAINTAINER Radek Winiecki "radezo2803@gmail.com"
+LABEL maintainer="radoslaw.winiecki@akai.org.pl"
 
 RUN apt-get update -y &&\
     apt-get install -y python3-pip python-dev
