@@ -18,6 +18,28 @@
 7. W tabeli settings w bazie danych zmieniamy bot_channel_id na ID kanału na którym będziemy wydawać polecenia Botowi
 
 
+## Odpalanie bota
+
+### Python
+1. `python -m venv env` - tworzymy environment w root folderze
+2. Aktywujemy environment
+   1. `./env/Scripts/activate` - Linux 
+   2. `./env/Scripts/activate.ps1` - Windows
+3. `pip install -r requirements.txt`  instalujemy dependencies
+4. `python app.py` odpalamy bota
+
+### Docker
+1. `docker build -t akai-discord-bot:latest .` - budujemy image z `Dockerfile`
+2. `docker run -d --name=akai-discord-bot akai-discord-bot` - tworzymy i odpalamy w tle kontener
+3. Działanie z kontenerem
+   1. `docker stop akai-discord-bot` zatrzymuje kontener
+   2. `docker start akai-discord-bot` włącza kontener ponownie
+   3. `docker exec -it akai-discord-bot bash` wbija bashem do kontenera
+4. Remarks
+   1. Aplikacja jest pod pathem `/app/`
+   2. `docker rm {id kontenera sprawdzone np. docker ps}` w razie co gdyby potrzeba kontener usunąć (nowy build i tak nadpisuje poprzedni, więc pewnie nie będzie trzeba tego używać)
+
+
 ## Pomocne linki: 
 - [SQLAlchemy](https://docs.sqlalchemy.org/en/14/orm/tutorial.html) - używany ORM  
 - [DiscordAPI](https://discordpy.readthedocs.io/en/stable/api.html) - Discord.py sdk
