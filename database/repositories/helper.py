@@ -57,3 +57,9 @@ class HelperRepository(Repository):
         roles = session.execute(select(self.range_model.role_id)).scalars().all()
         session.close()
         return roles
+    
+    def remove_user(self, user_id):
+        session = self.sessionmaker()
+        session.query(self.model).filter_by(user_id=user_id).delete()
+        session.commit()
+        session.close()
