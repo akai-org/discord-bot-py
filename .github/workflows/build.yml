@@ -8,6 +8,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Fill in secrets
+        run: |
+          mv .env.example .env \
+          && cp --attributes-only --preserve .env .env.tmp \
+          && cat .env | envsubst > .env.tmp \
+          && mv .env.tmp .env
+
       - name: Build the Docker image
         run: docker build -t akai-discord-bot:latest .
 
