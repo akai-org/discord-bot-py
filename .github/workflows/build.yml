@@ -7,7 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Build the Docker image
         run: docker build -t akai-discord-bot:latest .
+
       - name: Run the Docker container
         run: docker run -d --name=akai-discord-bot akai-discord-bot
+
+      - name: Verify that the container is running
+        run: |
+          if [ "$( docker container inspect -f '{{.State.Status}}' akai-discord-bot )" != "running" ]; then
+              docker logs akai-discord-bot
+              exit 1
+          fi
