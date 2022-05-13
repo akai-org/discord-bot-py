@@ -10,6 +10,8 @@ from services.helper import HelperService
 from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
 from services.ranking import RankingService
+from services.events import EventService
+
 
 
 class AkaiBot(discord.Client):
@@ -22,7 +24,8 @@ class AkaiBot(discord.Client):
                  helper_service: HelperService,
                  helper_repo: HelperRepository,
                  thread_service: ThreadService,
-                 ranking_service: RankingService
+                 ranking_service: RankingService,
+                 event_service: EventService
                  ):
         super().__init__(intents=discord.Intents.all())
         self.logger = logger
@@ -34,9 +37,12 @@ class AkaiBot(discord.Client):
         self.helper_repo = helper_repo
         self.thread = thread_service
         self.ranking = ranking_service
+        self.events = event_service
+
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
+        self.events.auto_update.start()
 
     async def on_message(self, message: discord.Message):
         if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
