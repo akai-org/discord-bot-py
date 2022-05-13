@@ -4,6 +4,11 @@ on: [ push ]
 
 jobs:
   build-image:
+    env:
+      NAME: akai-discord-bot
+      TOKEN: ${{ secrets.TOKEN }}
+      LOG_CHANNEL_ID: ${{ secrets.LOG_CHANNEL_ID }}
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,14 +21,14 @@ jobs:
           && mv .env.tmp .env
 
       - name: Build the Docker image
-        run: docker build -t akai-discord-bot:latest .
+        run: docker build -t $NAME:latest .
 
       - name: Run the Docker container
-        run: docker run -d --name=akai-discord-bot akai-discord-bot
+        run: docker run -d --name=$NAME $NAME
 
       - name: Verify that the container is running
         run: |
-          if [ "$( docker container inspect -f '{{.State.Status}}' akai-discord-bot )" != "running" ]; then
-              docker logs akai-discord-bot
+          if [ "$( docker container inspect -f '{{.State.Status}}' $NAME )" != "running" ]; then
+              docker logs $NAME
               exit 1
           fi
