@@ -13,3 +13,7 @@ class RequestUtilService:
     def make_post(self, data, endpoint_url) -> dict:
         url = self.base_url + endpoint_url
         return requests.post(url, headers=self.headers, json=data).json()
+    
+    def make_get(self, endpoint_url) -> dict:
+        url = self.base_url + endpoint_url
+        return requests.get(url, headers=self.headers).json()
