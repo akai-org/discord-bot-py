@@ -42,7 +42,8 @@ class AkaiBot(discord.Client):
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
-        self.events.auto_update.start()
+        server = self.get_channel(int(self.settings.at_key('cli_channel_id')))
+        self.events.auto_update.start(server.guild.id)
 
     async def on_message(self, message: discord.Message):
         if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
