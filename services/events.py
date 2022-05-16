@@ -6,33 +6,28 @@ from ics import Calendar
 from discord.ext import tasks
 from datetime import datetime, timezone
 
-import database.repositories.settings
+from database.repositories.settings import SettingsRepository
 from services.util.request import RequestUtilService
 
 class EventService:
     def __init__(self, 
                  logger: logging.Logger, 
-                 settings_repo: database.repositories.settings.SettingsRepository,
+                 settings_repo: SettingsRepository,
                  request_util: RequestUtilService):
         self.logger = logger
         self.settings = settings_repo
         self.request_util = request_util
         self.calendar_url = self.settings.at_key('calendar_url')
-        self.guild_id = self.settings.at_key('server_id')
-        self.event_url = f'/guilds/{self.guild_id}/scheduled-events'
         
     @tasks.loop(hours=24)
-    async def auto_update(self):
+    async def auto_update(self, guild_id):
+        event_url = f'/guilds/{guild_id}/scheduled-events'
         cal = Calendar(requests.get(self.calendar_url).text)
         calendar_events = sorted(cal.events)
-        discord_events = self.request_util.make_get(self.event_url)
+        discord_events = self.request_util.make_get(event_url)
 
         for event in calendar_events:
             if self.is_new(event, discord_events):
-                if not event.location:
-                    location = 'Unknown'
-                else:
-                    location = event.location
                 data = {
                 'name': event.name,
                 'privacy_level': 2,
@@ -40,10 +35,10 @@ class EventService:
                 'scheduled_end_time': event.end.strftime("%Y-%m-%dT%H:%M:%S"),
                 'description': event.description,
                 'channel_id': None,
-                'entity_metadata': {'location': location},
+                'entity_metadata': {'location': event.location if event.location else 'Unknown'},
                 'entity_type': 3
                 }
-                await self.create_event(data, self.event_url)
+                await self.create_event(data, event_url)
 
 
     async def create_event(self, data, url):
@@ -63,4 +58,3 @@ class EventService:
             if event['name'] == new_event.name and event['scheduled_start_time'] == new_event.begin.strftime("%Y-%m-%dT%H:%M:%S+00:00"):
                 return False
         return True
-
