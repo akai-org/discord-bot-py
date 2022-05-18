@@ -15,7 +15,7 @@ from database.models.helper_rank_threshold import HelperRankThreshold
 from database.models.message_to_role import MessageToRole
 from database.models.helper_reward import HelperReward
 from database.models.setting import Setting
-from database.orm import Session
+from database.orm import Session, clear_db
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
 from database.repositories.message_to_role import MessageToRoleRepository
@@ -93,14 +93,7 @@ if __name__ == '__main__':
 
     if DB_WIPE_ON_START:
         logger.info('Wiping database')
-        session = Session()
-        session.query(Command).delete()
-        session.query(MessageToRole).delete()
-        session.query(HelperRank).delete()
-        session.query(HelperRankThreshold).delete()
-        session.query(HelperReward).delete()
-        session.commit()
-        session.close()
+        clear_db()
         logger.info('Database wiped')
 
     if DB_LOAD_YAML_ON_START:
