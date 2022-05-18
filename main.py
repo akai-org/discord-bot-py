@@ -89,7 +89,7 @@ if __name__ == '__main__':
     role_channels = RoleChannels(logger, settings_repository, message_to_role_repository, request_util)
     command_service = CommandService(command_repository, helper_service, role_channels, logger, helper_repository)
     thread_service = ThreadService(logger, request_util)
-    ranking_service = RankingService(logger, command_repository, helper_repository)
+    ranking_service = RankingService(logger, helper_repository)
 
     if DB_WIPE_ON_START:
         logger.info('Wiping database')
