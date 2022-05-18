@@ -69,4 +69,4 @@ Baza danych składa się z 6 tabel, każda z kolumn ma property not null:
  6. **settings** - zawiera pary key:value do konfiguracji bota
     - key - TEXT - PK
     - value - TEXT
-Dodatkowo możemy wpisać wartości wartości z YAML'a do bazy danych oraz ją wyczyścić ustawiając odpowiednią flagę w .env
+Dodatkowo możemy wpisać wartości z YAML'a do bazy danych oraz ją wyczyścić ustawiając odpowiednią flagę w .env
