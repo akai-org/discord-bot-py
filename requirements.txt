@@ -12,3 +12,4 @@ SQLAlchemy==1.4.31
 typing-extensions==4.1.0
 yarl==1.7.2
 requests==2.27.1
+pyYAML==6.0
