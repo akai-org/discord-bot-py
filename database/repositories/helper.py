@@ -63,3 +63,12 @@ class HelperRepository(Repository):
         session.query(self.model).filter_by(user_id=user_id).delete()
         session.commit()
         session.close()
+
+    def load_from_yaml(self, yrange, yrewards):
+        session = self.sessionmaker()
+        for key, value in yrange.items():
+            session.add(self.range_model(bottom_threshold=key, role_id=value))
+        for key, value in yrewards.items():
+            session.add(self.reward_model(emoji_name=key, reward=value))
+        session.commit()
+        session.close()

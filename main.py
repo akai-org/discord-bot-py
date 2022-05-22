@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from logging import Logger
+import yaml
 
 from dotenv import load_dotenv
 
@@ -14,7 +15,7 @@ from database.models.helper_rank_threshold import HelperRankThreshold
 from database.models.message_to_role import MessageToRole
 from database.models.helper_reward import HelperReward
 from database.models.setting import Setting
-from database.orm import Session
+from database.orm import Session, clear_db
 from database.repositories.commands import CommandsRepository
 from database.repositories.helper import HelperRepository
 from database.repositories.message_to_role import MessageToRoleRepository
@@ -39,6 +40,8 @@ load_dotenv()
 LOG_FILE = os.getenv('LOGFILE')
 TOKEN = os.getenv('TOKEN')
 DISCORD_LOG_CHANNEL_ID = os.getenv('DISCORD_LOG_CHANNEL_ID')
+DB_WIPE_ON_START=os.getenv('DB_WIPE_ON_START')
+DB_LOAD_YAML_ON_START=os.getenv('DB_LOAD_YAML_ON_START')
 #
 
 # discord lib logger
@@ -91,7 +94,20 @@ if __name__ == '__main__':
     event_service = EventService(logger, settings_repository, request_util)
 
 
+    if DB_WIPE_ON_START:
+        logger.info('Wiping database')
+        clear_db()
+        logger.info('Database wiped')
 
+    if DB_LOAD_YAML_ON_START:
+        logger.info('Loading data from yaml file')
+        with open('db.yaml', 'r') as f:
+            data = yaml.safe_load(f)
+        command_repository.load_from_yaml(data['commands'])
+        helper_repository.load_from_yaml(data['helper_ranges'], data['helper_rewards'])
+        settings_repository.load_from_yaml(data['settings'])
+        logger.info('Data loaded')
+        
     bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
                   helper_service, helper_repository, thread_service, ranking_service, event_service)
 

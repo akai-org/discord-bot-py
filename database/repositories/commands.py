@@ -15,3 +15,10 @@ class CommandsRepository(Repository):
         response = session.execute(select(self.model.response).where(self.model.command == command)).scalars().first()
         session.close()
         return response
+
+    def load_from_yaml(self, data):
+        session = self.sessionmaker()
+        for key, value in data.items():
+            session.add(self.model(command=key, response=value))
+        session.commit()
+        session.close()
