@@ -1,0 +1,34 @@
+name: build
+
+on: [ push ]
+
+jobs:
+  build-image:
+    env:
+      NAME: akai-discord-bot
+      TOKEN: ${{ secrets.TOKEN }}
+      LOG_CHANNEL_ID: ${{ secrets.LOG_CHANNEL_ID }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Fill in secrets
+        run: |
+          mv .env.example .env \
+          && cp --attributes-only --preserve .env .env.tmp \
+          && cat .env | envsubst > .env.tmp \
+          && mv .env.tmp .env
+
+      - name: Build the Docker image
+        run: docker build -t $NAME:latest .
+
+      - name: Run the Docker container
+        run: docker run -d --name=$NAME $NAME
+
+      - name: Verify that the container is running
+        run: |
+          if [ "$( docker container inspect -f '{{.State.Status}}' $NAME )" != "running" ]; then
+              docker logs $NAME
+              exit 1
+          fi
