@@ -25,7 +25,7 @@ class CommandService:
         guild: discord.Guild = message.guild
         simple_commands = self.repository.available_commands()
 
-        command = parse_command(message)
+        command = full_command(message)
 
         self.logger.debug(f"Command '{command['name']}' recognized with arguments {command['args']} and parameters {command['params']}")
 
@@ -35,7 +35,6 @@ class CommandService:
             return
         self.logger.debug('Simple command not recognized')
 
-<<<<<<< HEAD
         if command['name'].startswith('dziekuje'):
             self.logger.debug('Thank you command recognized')
             self.helper.handle_thankyou(message)
@@ -56,14 +55,10 @@ class CommandService:
 
         if command['name'] in ['projekt', 'tech']:
             await self.role_channels.handle_role_channel(message, command)
-=======
-        if command == 'projekt':
-            await self.role_channels.handle_project_channel(message)
->>>>>>> f691de8c9167ffd9493a33fbbf91555f1182e148
             return
 
         
-def parse_command(message: discord.Message):
+def full_command(message: discord.Message):
     command = message.content.split()[0][1:]
     arguments = message.content.split("-")[0].split()[1:]
     params = {p[0]:p[1:].split() for p in message.content.split("-")[1:]}

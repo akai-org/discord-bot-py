@@ -6,7 +6,7 @@ from database.repositories.settings import SettingsRepository
 from database.repositories.message_to_role import MessageToRoleRepository
 from services.util.request import RequestUtilService
 
-TYPES = {
+ROLE_TYPES = {
     'projekt': {'name': 'project', 'id': 'project_channel_id'},
     'tech': {'name': 'technology', 'id': 'technology_channel_id'},
 }
@@ -37,10 +37,10 @@ class RoleChannels:
     async def create_role_channel(self, message, command, role_name):
         guild = message.guild
     
-        role_type = TYPES[command["name"]]["name"]
+        role_type = ROLE_TYPES[command["name"]]["name"]
 
         self.logger.debug(f'New {role_type} named {role_name} recognized')
-        channel_id = int(self.settings.at_key(TYPES[command["name"]]['id']))
+        channel_id = int(self.settings.at_key(ROLE_TYPES[command["name"]]['id']))
 
         if role_name not in [x.name for x in guild.roles]:
             role = await guild.create_role(name=role_name)
@@ -61,7 +61,7 @@ class RoleChannels:
     
     async def delete_role_channel(self, message, command, role_name):
         guild = message.guild
-        channel_id = int(self.settings.at_key(TYPES[command["name"]]['id']))
+        channel_id = int(self.settings.at_key(ROLE_TYPES[command["name"]]['id']))
         channel = guild.get_channel(channel_id)
         messages = await channel.history(limit=1000).flatten()
         for m in messages:
@@ -69,7 +69,7 @@ class RoleChannels:
                 self.logger.debug(f'Deleting {role_name} from {channel.name}')
                 await m.delete()
 
-                role_type = TYPES[command["name"]]["name"]
+                role_type = ROLE_TYPES[command["name"]]["name"]
                 role_object = discord.utils.get(guild.roles, name=role_name) 
                 await role_object.delete()
 
