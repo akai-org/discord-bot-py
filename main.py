@@ -40,8 +40,8 @@ load_dotenv()
 LOG_FILE = os.getenv('LOGFILE')
 TOKEN = os.getenv('TOKEN')
 DISCORD_LOG_CHANNEL_ID = os.getenv('DISCORD_LOG_CHANNEL_ID')
-DB_WIPE_ON_START=os.getenv('DB_WIPE_ON_START')
-DB_LOAD_YAML_ON_START=os.getenv('DB_LOAD_YAML_ON_START')
+DB_WIPE_ON_START=int(os.getenv('DB_WIPE_ON_START'))
+DB_LOAD_YAML_ON_START=int(os.getenv('DB_LOAD_YAML_ON_START'))
 #
 
 # discord lib logger
@@ -83,17 +83,6 @@ if __name__ == '__main__':
         helper_reward_model=HelperReward
     )
 
-    # services
-    request_util = RequestUtilService(TOKEN)
-    message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
-    helper_service = HelperService(helper_repository, logger)
-    role_channels = RoleChannels(logger, settings_repository, message_to_role_repository, request_util)
-    command_service = CommandService(command_repository, helper_service, role_channels, logger, helper_repository)
-    thread_service = ThreadService(logger, request_util)
-    ranking_service = RankingService(logger, helper_repository)
-    event_service = EventService(logger, settings_repository, request_util)
-
-
     if DB_WIPE_ON_START:
         logger.info('Wiping database')
         clear_db()
@@ -107,6 +96,18 @@ if __name__ == '__main__':
         helper_repository.load_from_yaml(data['helper_ranges'], data['helper_rewards'])
         settings_repository.load_from_yaml(data['settings'])
         logger.info('Data loaded')
+
+    # services
+    request_util = RequestUtilService(TOKEN)
+    message_to_role_service = MessageToRoleService(message_to_role_repository, logger)
+    helper_service = HelperService(helper_repository, logger)
+    role_channels = RoleChannels(logger, settings_repository, message_to_role_repository, request_util)
+    command_service = CommandService(command_repository, helper_service, role_channels, logger, helper_repository)
+    thread_service = ThreadService(logger, request_util)
+    ranking_service = RankingService(logger, helper_repository)
+    event_service = EventService(logger, settings_repository, request_util)
+
+
         
     bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
                   helper_service, helper_repository, thread_service, ranking_service, event_service)
