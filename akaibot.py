@@ -46,17 +46,18 @@ class AkaiBot(discord.Client):
         self.events.auto_update.start(server.guild.id)
 
     async def on_message(self, message: discord.Message):
-        if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
-            if message.content == "$setup":
-                self.ranking.channel = message.channel
-                await message.delete()
-                await self.ranking.channel.send('Loading...')
-            if message.author == self.user:
-                self.ranking.anchor = message
-                self.ranking.guild = message.guild
-                self.logger.debug('Ranking has been set up.')
-                await self.ranking.update()
-            return
+        if self.settings.at_key('ranking_channel_id'):
+            if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
+                if message.content == "$setup":
+                    self.ranking.channel = message.channel
+                    await message.delete()
+                    await self.ranking.channel.send('Loading...')
+                if message.author == self.user:
+                    self.ranking.anchor = message
+                    self.ranking.guild = message.guild
+                    self.logger.debug('Ranking has been set up.')
+                    await self.ranking.update()
+                return
 
         if message.author == self.user:
             self.logger.debug('Recognized self as message author')
@@ -70,11 +71,12 @@ class AkaiBot(discord.Client):
         self.logger.debug(f'Received message sent on '
                           f'{message.channel.name} in {message.channel.category.name} in '
                           f'{message.channel.guild.name}')
-
-        if message.channel.id == int(self.settings.at_key('thread_channel_id')):
-            self.logger.debug('Channel recognized as threads')
-            await self.thread.new_thread(message)
-            return
+        
+        if self.settings.at_key('thread_channel_id'):
+            if message.channel.id == int(self.settings.at_key('thread_channel_id')):
+                self.logger.debug('Channel recognized as threads')
+                await self.thread.new_thread(message)
+                return
 
         if message.channel.id != int(self.settings.at_key('cli_channel_id')):
             self.logger.debug('Channel not recognized as subscribed')
