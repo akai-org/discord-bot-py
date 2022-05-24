@@ -15,7 +15,29 @@
 4. Po wejściu w aplikację na portalu dodać bota w zakładce Bot, dać mu. W sekcji Privileged Gateway Intents zaznaczyć wszystkie 3 *intenty*.
 5. W zakładce OAuth2 zaznaczyć Authorization Method na In-App Authorization ustawić scope jako bot i applications.commands a w Bot Permissions ustawić Administrator
 6. Uzupełniamy plik .env by Token zdobędziemy w zakładce Bot na portalu discord_log_channel zaś to ID kanału tekstowego na naszym serwerze gdzie będą wysyłane logi (pobrać to ID możemy klikając prawym przyciskiem myszy na kanał, jeśli aktywowaliśmy ustawienia developerskie)
-7. W tabeli settings w bazie danych zmieniamy bot_channel_id na ID kanału na którym będziemy wydawać polecenia Botowi
+7. W pliku db.yaml ustawiamy wartości wartości potrzebne do działania każdej z usług (więcej w przykładowym pliku) i ustawiamy flagę DB_LOAD_YAML_ON_START=true
+
+
+## Odpalanie bota
+
+### Python
+1. `python -m venv env` - tworzymy environment w root folderze
+2. Aktywujemy environment
+   1. `./env/Scripts/activate` - Linux 
+   2. `./env/Scripts/activate.ps1` - Windows
+3. `pip install -r requirements.txt`  instalujemy dependencies
+4. `python app.py` odpalamy bota
+
+### Docker
+1. `docker build -t akai-discord-bot:latest .` - budujemy image z `Dockerfile`
+2. `docker run -d --name=akai-discord-bot akai-discord-bot` - tworzymy i odpalamy w tle kontener
+3. Działanie z kontenerem
+   1. `docker stop akai-discord-bot` zatrzymuje kontener
+   2. `docker start akai-discord-bot` włącza kontener ponownie
+   3. `docker exec -it akai-discord-bot bash` wbija bashem do kontenera
+4. Remarks
+   1. Aplikacja jest pod pathem `/app/`
+   2. `docker rm {id kontenera sprawdzone np. docker ps}` w razie co gdyby potrzeba kontener usunąć (nowy build i tak nadpisuje poprzedni, więc pewnie nie będzie trzeba tego używać)
 
 
 ## Pomocne linki: 
@@ -47,3 +69,4 @@ Baza danych składa się z 6 tabel, każda z kolumn ma property not null:
  6. **settings** - zawiera pary key:value do konfiguracji bota
     - key - TEXT - PK
     - value - TEXT
+Dodatkowo możemy wpisać wartości z YAML'a do bazy danych oraz ją wyczyścić ustawiając odpowiednią flagę w .env

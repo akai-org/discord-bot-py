@@ -4,10 +4,14 @@ import discord
 
 import database.repositories.settings
 from database.repositories.message_to_role import MessageToRoleRepository
+from database.repositories.helper import HelperRepository
 from services.command import CommandService
 from services.helper import HelperService
 from services.message_to_role import MessageToRoleService
 from services.thread import ThreadService
+from services.ranking import RankingService
+from services.events import EventService
+
 
 
 class AkaiBot(discord.Client):
@@ -18,7 +22,10 @@ class AkaiBot(discord.Client):
                  message_to_role_service: MessageToRoleService,
                  message_to_role_repo: MessageToRoleRepository,
                  helper_service: HelperService,
-                 thread_service: ThreadService
+                 helper_repo: HelperRepository,
+                 thread_service: ThreadService,
+                 ranking_service: RankingService,
+                 event_service: EventService
                  ):
         super().__init__(intents=discord.Intents.all())
         self.logger = logger
@@ -27,12 +34,30 @@ class AkaiBot(discord.Client):
         self.role_service = message_to_role_service
         self.role_repo = message_to_role_repo
         self.helper = helper_service
+        self.helper_repo = helper_repo
         self.thread = thread_service
+        self.ranking = ranking_service
+        self.events = event_service
+
 
     async def on_ready(self):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
+        server = self.get_channel(int(self.settings.at_key('cli_channel_id')))
+        self.events.auto_update.start(server.guild.id)
 
     async def on_message(self, message: discord.Message):
+        if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
+            if message.content == "$setup":
+                self.ranking.channel = message.channel
+                await message.delete()
+                await self.ranking.channel.send('Loading...')
+            if message.author == self.user:
+                self.ranking.anchor = message
+                self.ranking.guild = message.guild
+                self.logger.debug('Ranking has been set up.')
+                await self.ranking.update()
+            return
+
         if message.author == self.user:
             self.logger.debug('Recognized self as message author')
             return
@@ -63,6 +88,12 @@ class AkaiBot(discord.Client):
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         self.logger.debug('Received reaction add info')
+        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
+        if payload.emoji.name in self.helper_repo.get_emojis():
+            points = self.helper_repo.get_reward(payload.emoji.name)
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await self.helper.change_points(msg.author, member, self.user, points)
+            await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:
             self.logger.debug('Received a reaction on a message not associated with any role')
@@ -78,8 +109,13 @@ class AkaiBot(discord.Client):
         await self.role_service.add_role(payload.message_id, payload.member)
 
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
         self.logger.debug('Received reaction remove info')
+        member = self.get_guild(payload.guild_id).get_member(payload.user_id)
+        if payload.emoji.name in self.helper_repo.get_emojis():
+            points = self.helper_repo.get_reward(payload.emoji.name)
+            msg = await self.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await self.helper.change_points(msg.author, member, self.user, -points)
+            await self.ranking.update()
 
         if self.role_repo.get_role_id(payload.message_id) is None:
             self.logger.debug('Received a reaction removal on a message not associated with any role')

@@ -8,3 +8,11 @@ engine = create_engine(f'sqlite:///{SQLITE_FILE}')
 Base = declarative_base()
 Base.metadata.create_all(bind=engine)
 Session = sessionmaker(bind=engine)
+
+def clear_db():
+    session = Session()
+    meta = Base.metadata
+    for table in reversed(meta.sorted_tables):
+        session.execute(table.delete())
+    session.commit()
+    session.close()

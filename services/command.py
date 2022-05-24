@@ -35,6 +35,7 @@ class CommandService:
             return
         self.logger.debug('Simple command not recognized')
 
+<<<<<<< HEAD
         if command['name'].startswith('dziekuje'):
             self.logger.debug('Thank you command recognized')
             self.helper.handle_thankyou(message)
@@ -55,6 +56,10 @@ class CommandService:
 
         if command['name'] in ['projekt', 'tech']:
             await self.role_channels.handle_role_channel(message, command)
+=======
+        if command == 'projekt':
+            await self.role_channels.handle_project_channel(message)
+>>>>>>> f691de8c9167ffd9493a33fbbf91555f1182e148
             return
 
         
