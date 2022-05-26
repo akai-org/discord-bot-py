@@ -41,10 +41,10 @@ class CommandService:
         
 def full_command(message: discord.Message):
     command = message.content.split()[0][1:]
-    arguments = message.content.split("-")[0].split()[1:]
-    params = {p[0]:p[1:].split() for p in message.content.split("-")[1:]}
+    arguments = message.content.split(" -")[0].split()[1:]
+    params = {p[0]:p[1:].split() for p in message.content.split(" -")[1:]}
     return {
         'name': command,
         'args': arguments,
-        'params': params,
+        'params': params
     }
