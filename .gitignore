@@ -4,3 +4,4 @@ discord.log
 __pycache__
 venv
 db.yaml
+db.sqlite3
