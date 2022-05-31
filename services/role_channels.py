@@ -26,15 +26,15 @@ class RoleChannels:
     async def handle_role_channel(self, message, command):
         if len(command["args"]) == 0:
             if(command["name"] == "projekt"):
-                await message.reply(f"""HELP: \n\t$projekt <nazwy projektów> -m <opis projektu> -p <projekt managerzy> -t <tech stack>\n\t$projekt <nazwy projektów> -d\t          - usuń projekt""")
+                await message.reply(f"""HELP: \n\t$projekt <nazwa projektu> -m <opis projektu> -p <projekt managerzy> -t <tech stack>\n\t$projekt <nazwa projektu> -d\t          - usuń projekt""")
             else:
-                await message.reply(f'HELP: \n\t$tech <nazwy technologii>\t          - utwórz technologię \n\t$tech <nazwy technologii> -d\t          - usuń technologie')
-
-        for role_name in command['args']:
-            if "d" in command['params']:
-                await self.delete_role_channel(message, command, role_name)
+                await message.reply(f'HELP: \n\t$tech <nazwa technologii>\t          - utwórz technologię \n\t$tech <nazwa technologii> -d\t          - usuń technologie')
+        
+        else:
+            if "d" in command["params"]:
+                await self.delete_role_channel(message, command, " ".join(command["args"]))
             else:
-                await self.create_role_channel(message, command, role_name)
+                await self.create_role_channel(message, command, " ".join(command["args"]))
 
 
     async def create_role_channel(self, message, command, role_name):
@@ -74,7 +74,7 @@ class RoleChannels:
         channel = guild.get_channel(channel_id)
         messages = await channel.history(limit=1000).flatten()
         for m in messages:
-            if(role_name == m.content.split()[1][2:-2]):
+            if(role_name == m.content.split("**")[1]):
                 self.logger.debug(f'Deleting {role_name} from {channel.name}')
                 await m.delete()
 
