@@ -9,10 +9,10 @@ helper_rewards:
 
 settings:
   # key: value
-  bot_channel_id: $BOT_CHANNEL_ID
-  project_channel_id: $PROJECT_CHANNEL_ID
-  thread_channel_id: $THREAD_CHANNEL_ID
-  role_add_emoji: $ROLE_ADD_EMOJI
-  cli_channel_id: $CLI_CHANNEL_ID
-  technology_channel_id: $TECHNOLOGY_CHANNEL_ID
-  ranking_channel_id: $RANKING_CHANNEL_ID
+  #bot_channel_id: $BOT_CHANNEL_ID
+  #project_channel_id: $PROJECT_CHANNEL_ID
+  #thread_channel_id: $THREAD_CHANNEL_ID
+  role_add_emoji: ✅
+  #cli_channel_id: $CLI_CHANNEL_ID
+  #technology_channel_id: $TECHNOLOGY_CHANNEL_ID
+  #ranking_channel_id: $RANKING_CHANNEL_ID
