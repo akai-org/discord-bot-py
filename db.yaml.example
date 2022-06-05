@@ -1,18 +1,17 @@
 commands:
-  # command: "response" | example - test: "response on test"
-  
+  # command: "response" | test: "response on test"
+
 helper_ranges:
-  # bottom_threshold: role_id | example - 5 : 973561566974840852
+  # bottom_threshold: role_id | 5 : 973561566974840852
 
 helper_rewards:
-  # emoji_name: reward | example - 6: 964533646746853457
+  # emoji_name: number_of_points | thanks: 1
 
 settings:
-  # key: value
-  bot_channel_id: $BOT_CHANNEL_ID
-  project_channel_id: $PROJECT_CHANNEL_ID
-  thread_channel_id: $THREAD_CHANNEL_ID
-  role_add_emoji: $ROLE_ADD_EMOJI
   cli_channel_id: $CLI_CHANNEL_ID
+  project_channel_id: $PROJECT_CHANNEL_ID
   technology_channel_id: $TECHNOLOGY_CHANNEL_ID
+  thread_channel_id: $THREAD_CHANNEL_ID
   ranking_channel_id: $RANKING_CHANNEL_ID
+  role_add_emoji: $ROLE_ADD_EMOJI
+  calendar_url: $CALENDAR_URL
