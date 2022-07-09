@@ -44,14 +44,14 @@ class AkaiBot(discord.Client):
         self.logger.info(f'Bot is ready to use, logged in as {self.user}')
         server = self.get_channel(int(self.settings.at_key('cli_channel_id')))
         self.events.auto_update.start(server.guild.id)
+        if self.settings.at_key('ranking_channel_id'):
+            self.ranking.channel = self.get_channel(int(self.settings.at_key('ranking_channel_id')))
+            await self.ranking.channel.purge(limit=9999)
+            await self.ranking.channel.send('Loading...')
 
     async def on_message(self, message: discord.Message):
         if self.settings.at_key('ranking_channel_id'):
             if message.channel.id == int(self.settings.at_key('ranking_channel_id')):
-                if message.content == "$setup":
-                    self.ranking.channel = message.channel
-                    await message.delete()
-                    await self.ranking.channel.send('Loading...')
                 if message.author == self.user:
                     self.ranking.anchor = message
                     self.ranking.guild = message.guild

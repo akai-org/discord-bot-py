@@ -1,6 +1,7 @@
-.idea
-.env
-discord.log
+/.idea
 __pycache__
-venv
+/venv
+/env
+.env
 db.yaml
+discord.log

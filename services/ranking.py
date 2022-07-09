@@ -29,7 +29,7 @@ class RankingService:
             if not hasattr(self.guild.get_member(rank.user_id), 'name'):
                 self.repository.remove_user(rank.user_id)
                 continue
-            if rank.points == 0:
+            if rank.points <= 0:
                 continue
             data += (f'{":first_place:" if place == 1 else ":second_place:" if place == 2 else ":third_place:" if place == 3 else "`"+str(place)+".`"} '
                      f'**{self.guild.get_member(rank.user_id).name}** — {rank.points} {"point" if rank.points == 1 else "points"}\n')

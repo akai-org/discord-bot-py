@@ -21,6 +21,9 @@ class HelperRepository(Repository):
             user.user_id = user_id
             user.points = points
             session.add(user)
+        elif user_points < 0:
+            session.execute(
+                update(self.user_rank_model).where(self.user_rank_model.user_id == user_id).values(points=0 + points))
         else:
             session.execute(
                 update(self.user_rank_model).where(self.user_rank_model.user_id == user_id).values(points=user_points + points))
