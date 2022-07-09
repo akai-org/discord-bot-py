@@ -28,18 +28,18 @@ from services.ranking import RankingService
 from services.util.request import RequestUtilService
 from services.events import EventService
 
-WRITE_FILE_MODE = 'w'
-LOG_FILE_ENCODING = 'utf-8'
-DISCORD_LIB_LOGGER_NAME = 'discord'
-BOT_LOGGER_NAME = 'akaibot'
-LOGGER_FORMATTING = '%(asctime)s %(levelname)s %(name)s: %(message)s'
+WRITE_FILE_MODE = "w"
+LOG_FILE_ENCODING = "utf-8"
+DISCORD_LIB_LOGGER_NAME = "discord"
+BOT_LOGGER_NAME = "akaibot"
+LOGGER_FORMATTING = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 #
 
 # env
 load_dotenv()
-LOG_FILE = os.getenv('LOGFILE')
-TOKEN = os.getenv('TOKEN')
-DISCORD_LOG_CHANNEL_ID = os.getenv('DISCORD_LOG_CHANNEL_ID')
+LOG_FILE = os.getenv("LOGFILE")
+TOKEN = os.getenv("TOKEN")
+DISCORD_LOG_CHANNEL_ID = os.getenv("DISCORD_LOG_CHANNEL_ID")
 #
 
 # discord lib logger
@@ -60,40 +60,31 @@ logger.addHandler(console_handler)
 #
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # repositories
-    settings_repository = database.repositories.settings.SettingsRepository(
-        sessionmaker=Session,
-        model=Setting
-    )
-    command_repository = CommandsRepository(
-        sessionmaker=Session,
-        model=Command
-    )
-    message_to_role_repository = MessageToRoleRepository(
-        sessionmaker=Session,
-        model=MessageToRole
-    )
+    settings_repository = database.repositories.settings.SettingsRepository(sessionmaker=Session, model=Setting)
+    command_repository = CommandsRepository(sessionmaker=Session, model=Command)
+    message_to_role_repository = MessageToRoleRepository(sessionmaker=Session, model=MessageToRole)
     helper_repository = HelperRepository(
         sessionmaker=Session,
         user_rank_model=HelperRank,
         helper_range_model=HelperRankThreshold,
-        helper_reward_model=HelperReward
+        helper_reward_model=HelperReward,
     )
 
-    if 'wipe' in sys.argv:
-        logger.info('Wiping database')
+    if "wipe" in sys.argv:
+        logger.info("Wiping database")
         clear_db()
-        logger.info('Database wiped')
+        logger.info("Database wiped")
 
-    if 'load' in sys.argv:
-        logger.info('Loading data from yaml file')
-        with open('db.yaml', 'r') as f:
+    if "load" in sys.argv:
+        logger.info("Loading data from yaml file")
+        with open("db.yaml", "r") as f:
             data = yaml.safe_load(f)
-        command_repository.load_from_yaml(data['commands'])
-        helper_repository.load_from_yaml(data['helper_ranges'], data['helper_rewards'])
-        settings_repository.load_from_yaml(data['settings'])
-        logger.info('Data loaded')
+        command_repository.load_from_yaml(data["commands"])
+        helper_repository.load_from_yaml(data["helper_ranges"], data["helper_rewards"])
+        settings_repository.load_from_yaml(data["settings"])
+        logger.info("Data loaded")
 
     # services
     request_util = RequestUtilService(TOKEN)
@@ -105,10 +96,18 @@ if __name__ == '__main__':
     ranking_service = RankingService(logger, helper_repository)
     event_service = EventService(logger, settings_repository, request_util)
 
-
-        
-    bot = AkaiBot(logger, settings_repository, command_service, message_to_role_service, message_to_role_repository,
-                  helper_service, helper_repository, thread_service, ranking_service, event_service)
+    bot = AkaiBot(
+        logger,
+        settings_repository,
+        command_service,
+        message_to_role_service,
+        message_to_role_repository,
+        helper_service,
+        helper_repository,
+        thread_service,
+        ranking_service,
+        event_service,
+    )
 
     if DISCORD_LOG_CHANNEL_ID is not None:
         discord_handler = log_handling.DiscordHandler(bot, int(DISCORD_LOG_CHANNEL_ID))
