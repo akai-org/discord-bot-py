@@ -41,7 +41,8 @@
    1. `source ./env/Scripts/activate` - Linux 
    2. `.\env\Scripts\activate.ps1` - Windows
 3. `pip install -r requirements.txt` - instalujemy dependencies
-4. `python app.py` - odpalamy bota
+4. `python main.py` - odpalamy bota
+5. Opcjonalne parametry - `wipe` i `load`. Odpowiednio: wipe bazy oraz nadpisanie bazy danymi z `db.yaml` (użycie: `python main.py wipe load`)
 
 ### Docker
 1. `docker build -t akai-discord-bot:latest .` - budujemy image z `Dockerfile`

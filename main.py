@@ -40,8 +40,6 @@ load_dotenv()
 LOG_FILE = os.getenv('LOGFILE')
 TOKEN = os.getenv('TOKEN')
 DISCORD_LOG_CHANNEL_ID = os.getenv('DISCORD_LOG_CHANNEL_ID')
-DB_WIPE_ON_START=int(os.getenv('DB_WIPE_ON_START'))
-DB_LOAD_YAML_ON_START=int(os.getenv('DB_LOAD_YAML_ON_START'))
 #
 
 # discord lib logger
@@ -83,12 +81,12 @@ if __name__ == '__main__':
         helper_reward_model=HelperReward
     )
 
-    if DB_WIPE_ON_START:
+    if 'wipe' in sys.argv:
         logger.info('Wiping database')
         clear_db()
         logger.info('Database wiped')
 
-    if DB_LOAD_YAML_ON_START:
+    if 'load' in sys.argv:
         logger.info('Loading data from yaml file')
         with open('db.yaml', 'r') as f:
             data = yaml.safe_load(f)
