@@ -1,9 +1,9 @@
-from distutils.log import debug
-import discord
 import logging
 
-from database.repositories.settings import SettingsRepository
+import discord
+
 from database.repositories.message_to_role import MessageToRoleRepository
+from database.repositories.settings import SettingsRepository
 from services.util.request import RequestUtilService
 
 ROLE_TYPES = {

@@ -10,6 +10,17 @@ from database.repositories.settings import SettingsRepository
 from services.util.request import RequestUtilService
 
 
+def is_new(new_event, present_events):
+    if new_event.begin < datetime.now(timezone.utc):
+        return False
+    for event in present_events:
+        if event["name"] == new_event.name and event["scheduled_start_time"] == new_event.begin.strftime(
+            "%Y-%m-%dT%H:%M:%S+00:00"
+        ):
+            return False
+    return True
+
+
 class EventService:
     def __init__(self, logger: logging.Logger, settings_repo: SettingsRepository, request_util: RequestUtilService):
         self.logger = logger
@@ -25,7 +36,7 @@ class EventService:
         discord_events = self.request_util.make_get(event_url)
 
         for event in calendar_events:
-            if self.is_new(event, discord_events):
+            if is_new(event, discord_events):
                 data = {
                     "name": event.name,
                     "privacy_level": 2,
@@ -46,13 +57,3 @@ class EventService:
         else:
             self.logger.debug(f'Event created: {result["name"]}')
             return result
-
-    def is_new(self, new_event, present_events):
-        if new_event.begin < datetime.now(timezone.utc):
-            return False
-        for event in present_events:
-            if event["name"] == new_event.name and event["scheduled_start_time"] == new_event.begin.strftime(
-                "%Y-%m-%dT%H:%M:%S+00:00"
-            ):
-                return False
-        return True

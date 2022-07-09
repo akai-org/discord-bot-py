@@ -30,7 +30,7 @@
 6. Uzupełniamy plik `.env`.
    1. Token zdobędziemy w zakładce Bot na portalu
    2. `DISCORD_LOG_CHANNEL` zaś to ID kanału tekstowego na naszym serwerze gdzie będą wysyłane logi 
-7. W pliku `db.yaml` ustawiamy wartości potrzebne do działania każdej z usług (więcej w przykładowym pliku) i ustawiamy flagę `DB_LOAD_YAML_ON_START` na wartość `1`.
+7. W pliku `db.yaml` ustawiamy wartości potrzebne do działania każdej z usług (więcej w przykładowym pliku) i odpalamy program z argumentami `wipe` oraz `load`.
 
 
 ## Odpalanie bota

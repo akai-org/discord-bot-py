@@ -24,7 +24,6 @@ class CommandService:
         self.helper_repository = helper_repository
 
     async def handle(self, message: discord.Message):
-        guild: discord.Guild = message.guild
         simple_commands = self.repository.available_commands()
 
         command = full_command(message)
