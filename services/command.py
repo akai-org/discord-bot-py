@@ -24,19 +24,27 @@ class CommandService:
     async def handle(self, message: discord.Message):
         guild: discord.Guild = message.guild
         simple_commands = self.repository.available_commands()
-        command = message.content.split()[0][1:]
 
-        self.logger.debug(f'content: {message.content}')
-        if command in simple_commands:
-            await message.reply(self.repository.response_for_command(command))
+        command = full_command(message)
+
+        self.logger.debug(f"Command '{command['name']}' recognized with arguments {command['args']} and parameters {command['params']}")
+
+        if command['name'] in simple_commands:
+            await message.reply(self.repository.response_for_command(command['name']))
             return
         self.logger.debug('Simple command not recognized')
-
-        if command == 'projekt':
-            await self.role_channels.handle_project_channel(message)
-            return
         
-        if command == 'tech':
-            await self.role_channels.handle_tech_channel(message)
+        if command['name'] in ['projekt', 'tech']:
+            await self.role_channels.handle_role_channel(message, command)
             return
-            
+
+        
+def full_command(message: discord.Message):
+    command = message.content.split()[0][1:]
+    arguments = message.content.split(" -")[0].split()[1:]
+    params = {p[0]:p[1:].split() for p in message.content.split(" -")[1:]}
+    return {
+        'name': command,
+        'args': arguments,
+        'params': params
+    }

@@ -13,5 +13,5 @@ settings:
   technology_channel_id: $TECHNOLOGY_CHANNEL_ID
   thread_channel_id: $THREAD_CHANNEL_ID
   ranking_channel_id: $RANKING_CHANNEL_ID
-  role_add_emoji: $ROLE_ADD_EMOJI
+  role_add_emoji: ✅
   calendar_url: $CALENDAR_URL

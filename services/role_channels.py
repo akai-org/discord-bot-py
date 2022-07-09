@@ -1,8 +1,15 @@
+from distutils.log import debug
+import discord
 import logging
 
 from database.repositories.settings import SettingsRepository
 from database.repositories.message_to_role import MessageToRoleRepository
 from services.util.request import RequestUtilService
+
+ROLE_TYPES = {
+    'projekt': {'name': 'projekt', 'id': 'project_channel_id'},
+    'tech': {'name': 'technology', 'id': 'technology_channel_id'},
+}
 
 class RoleChannels:
     def __init__(self,
@@ -15,55 +22,68 @@ class RoleChannels:
         self.message_to_role_repo = message_to_role_repository
         self.request_util = request_util
 
-    async def handle_project_channel(self, message):
+
+    async def handle_role_channel(self, message, command):
+        if len(command["args"]) == 0:
+            if(command["name"] == "projekt"):
+                await message.reply(f"""HELP: \n\t$projekt <nazwa projektu> -m <opis projektu> -p <projekt managerzy> -t <tech stack>\n\t$projekt <nazwa projektu> -d\t          - usuń projekt""")
+            else:
+                await message.reply(f'HELP: \n\t$tech <nazwa technologii>\t          - utwórz technologię \n\t$tech <nazwa technologii> -d\t          - usuń technologie')
+        
+        else:
+            if "d" in command["params"]:
+                await self.delete_role_channel(message, command, " ".join(command["args"]))
+            else:
+                await self.create_role_channel(message, command, " ".join(command["args"]))
+
+
+    async def create_role_channel(self, message, command, role_name):
         guild = message.guild
-        project_name = ''.join(message.content.split()[1:])
-        if project_name == '':
-            await message.reply('empty name')
-            return
+    
+        role_type = ROLE_TYPES[command["name"]]["name"]
 
-        self.logger.debug(f'New project named {project_name} recognized')
-        project_channel_id = int(self.settings.at_key('project_channel_id'))
+        self.logger.debug(f'New {role_type} named {role_name} recognized')
+        channel_id = int(self.settings.at_key(ROLE_TYPES[command["name"]]['id']))
 
-        if project_name not in [x.name for x in guild.roles]:
-            role = await guild.create_role(name=project_name)
+        if role_name not in [x.name for x in guild.roles]:
+            role = await guild.create_role(name=role_name)
 
-            url = f"/channels/{project_channel_id}/messages"
+            url = f"/channels/{channel_id}/messages"
             data = {
-                "content": f'New project {project_name} appeared!'
+                "content": f'{role_type}: **{role_name}**\n'
             }
+
+            if role_type == 'projekt':
+                data['content'] += ' '.join(command["params"]["m"]) if "m" in command["params"] else ''
+                data['content'] += "\nPM: " + ' '.join(command["params"]["p"]) if "p" in command["params"] else ''
+                data['content'] += "\nTech stack: " + ' '.join(command["params"]["t"]) if "t" in command["params"] else ''
+
             response = self.request_util.make_post(data, url)
 
             self.message_to_role_repo.create_message_role_association(response['id'], role.id)
 
-            channel = guild.get_channel(project_channel_id)
+            channel = guild.get_channel(channel_id)
             await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
         else:
-            await message.reply('project already exists')
+            await message.reply(f'{role_type} - {role_name} already exists')
 
-
-    async def handle_tech_channel(self, message):
+    
+    async def delete_role_channel(self, message, command, role_name):
         guild = message.guild
-        tech_name = ''.join(message.content.split()[1:])
-        if tech_name == '':
-            await message.reply('empty name')
-            return
+        channel_id = int(self.settings.at_key(ROLE_TYPES[command["name"]]['id']))
+        channel = guild.get_channel(channel_id)
+        messages = await channel.history(limit=1000).flatten()
+        for m in messages:
+            if(role_name == m.content.split("**")[1]):
+                self.logger.debug(f'Deleting {role_name} from {channel.name}')
+                await m.delete()
 
-        self.logger.debug(f'New technology named {tech_name} recognized')
-        technology_channel_id = int(self.settings.at_key('technology_channel_id'))
+                role_type = ROLE_TYPES[command["name"]]["name"]
+                role_object = discord.utils.get(guild.roles, name=role_name) 
+                await role_object.delete()
 
-        if tech_name not in [x.name for x in guild.roles]:
-            role = await guild.create_role(name=tech_name)
-
-            url = f"/channels/{technology_channel_id}/messages"
-            data = {
-                "content": f'New technology {tech_name} appeared!'
-            }
-            response = self.request_util.make_post(data, url)
-
-            self.message_to_role_repo.create_message_role_association(response['id'], role.id)
-
-            channel = guild.get_channel(technology_channel_id)
-            await channel.get_partial_message(response['id']).add_reaction(self.settings.at_key('role_add_emoji'))
+                await message.reply(f'Deleted {role_type} - {role_name}')
+                break
         else:
-            await message.reply('technology already exists')
+            await message.reply(f'{role_name} not found in {channel.name}')
+
